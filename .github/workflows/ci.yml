@@ -1,0 +1,257 @@
+name: ci-linux
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Pinned calc-flow commit that carries the public Runtime registration API.
+  # Once a calc-flow-python release after 2026.10.12 is on PyPI, the jobs below
+  # can install the core wheel from PyPI instead of building this commit.
+  CALC_FLOW_CORE_REF: 4323caffb657acff6ffe5ba54952616dafe046dc
+
+jobs:
+  core-wheel:
+    name: Build pinned calc-flow-python wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out calc-flow core
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          repository: wegamekinglc/calc-flow
+          ref: ${{ env.CALC_FLOW_CORE_REF }}
+          path: calc-flow
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.13"
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
+        with:
+          workspaces: calc-flow
+          key: ${{ env.CALC_FLOW_CORE_REF }}
+      - name: Build core wheel
+        working-directory: calc-flow
+        run: >-
+          uv build --wheel
+          --config-setting 'build-args=--features pyo3/abi3-py313'
+          --out-dir ../dist
+      - name: Upload core distributions
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: python-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7
+
+  frontend:
+    name: Studio build + tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-ui
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20.20.0
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint studio frontend
+        run: npm run lint
+      - name: Build studio
+        run: npm run build
+      - name: Run frontend tests
+        run: npm test
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+  studio-backend:
+    name: Studio backend tests
+    needs: core-wheel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: .python-version
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20.20.0
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+      - name: Download core distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: python-distributions
+          path: dist
+      - name: Install studio dependencies
+        run: |
+          uv sync --package calc-flow-studio --extra dev --no-install-workspace
+          uv pip install --python .venv/bin/python --no-deps dist/calc_flow_python-*.whl
+          uv pip install --python .venv/bin/python --no-deps --editable web-ui/backend
+          cd web-ui && npm ci
+      - name: Run studio backend coverage
+        timeout-minutes: 15
+        working-directory: web-ui/backend
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: >-
+          uv run --no-sync --project . pytest -vv -o faulthandler_timeout=60
+          --cov=calc_flow_studio --cov-report=term-missing --cov-report=xml
+      - name: Verify generated API contract
+        run: |
+          uv run --no-sync --project web-ui/backend \
+            python web-ui/scripts/export_openapi.py
+          npm --prefix web-ui run generate:api
+          git diff --exit-code -- web-ui/openapi.json web-ui/src/api/schema.d.ts
+      - name: Upload studio coverage report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: studio-python-coverage
+          path: web-ui/backend/coverage.xml
+          if-no-files-found: error
+          retention-days: 14
+
+  browser-e2e:
+    name: Studio browser workflow
+    needs: core-wheel
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web-ui
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: .python-version
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+      - name: Download core distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: python-distributions
+          path: dist
+      - name: Install backend
+        working-directory: .
+        run: |
+          uv sync --package calc-flow-studio --no-install-workspace
+          uv pip install --python .venv/bin/python --no-deps dist/calc_flow_python-*.whl
+          uv pip install --python .venv/bin/python --no-deps --editable web-ui/backend
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20.20.0
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+      - name: Install frontend
+        run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('web-ui/package-lock.json') }}
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser workflow
+        run: npm run test:e2e
+
+  studio-package:
+    name: Build + isolated studio wheel smoke test
+    needs:
+      - core-wheel
+      - frontend
+      - studio-backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version-file: .python-version
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          enable-cache: true
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 20.20.0
+          cache: npm
+          cache-dependency-path: web-ui/package-lock.json
+      - name: Download core distributions
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: python-distributions
+          path: dist
+      - name: Build studio wheel
+        run: |
+          npm --prefix web-ui ci
+          npm --prefix web-ui run build
+          uv build --project web-ui/backend --wheel --out-dir dist
+      - name: Install and inspect studio wheels
+        run: |
+          uv venv /tmp/calc-flow-studio-wheel
+          uv pip install --python /tmp/calc-flow-studio-wheel/bin/python \
+            dist/calc_flow_python-*.whl dist/calc_flow_studio-*.whl
+          test -x /tmp/calc-flow-studio-wheel/bin/calc-flow-web
+          /tmp/calc-flow-studio-wheel/bin/python - <<'PY'
+          from importlib.metadata import requires
+          from pathlib import Path
+
+          import calc_flow
+          import calc_flow_studio
+          import tomllib
+
+          app = calc_flow_studio.create_app()
+          paths = [route.path for route in app.routes]
+          assert "/api/v3/catalog" in app.openapi()["paths"]
+          assert "/" in paths
+          assert "/assets" in paths
+          assert not hasattr(calc_flow, "web")
+          with Path("web-ui/backend/pyproject.toml").open("rb") as stream:
+              version = tomllib.load(stream)["project"]["version"]
+          upper_bound = f"<{int(version.split('.')[0]) + 1}"
+          core_requirements = requires("calc-flow-python") or []
+          studio_requirements = requires("calc-flow-studio") or []
+          assert not any("fastapi" in item.lower() for item in core_requirements)
+          assert not any("uvicorn" in item.lower() for item in core_requirements)
+          assert any(
+              item.lower().startswith("calc-flow-python")
+              and f">={version}" in item
+              and upper_bound in item
+              for item in studio_requirements
+          )
+          index = next(route for route in app.routes if route.path == "/").endpoint()
+          assert Path(index.path).is_file()
+          PY
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: studio-python-distributions
+          path: dist/calc_flow_studio-*.whl
+          if-no-files-found: error
+          retention-days: 30
