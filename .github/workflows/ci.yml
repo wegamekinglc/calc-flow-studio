@@ -10,7 +10,7 @@ env:
   # Pinned calc-flow commit that carries the public Runtime registration API.
   # Once a calc-flow-python release after 2026.10.12 is on PyPI, the jobs below
   # can install the core wheel from PyPI instead of building this commit.
-  CALC_FLOW_CORE_REF: 4323caffb657acff6ffe5ba54952616dafe046dc
+  CALC_FLOW_CORE_REF: 1d2ac908aff0b4bf80e39dec4e0eb68e0c513a7d
 
 jobs:
   core-wheel:
