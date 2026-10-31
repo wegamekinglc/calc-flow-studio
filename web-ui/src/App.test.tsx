@@ -108,6 +108,47 @@ afterEach(() => {
 });
 
 describe('Calc Flow Studio', () => {
+  it('runs confirmed batch input and displays results without starting a stream job', async () => {
+    let savedProject = blankProject();
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(input);
+      if (path.endsWith('/catalog')) return response(catalog);
+      if (path.endsWith('/capabilities')) return response(capabilities);
+      if (path.endsWith('/projects') && !init?.method) return response([]);
+      if (path.endsWith('/projects') && init?.method === 'POST') {
+        savedProject = JSON.parse(String(init.body));
+        return response(savedProject, 201);
+      }
+      const preview = {
+        id: 'preview-1', project_id: savedProject.id, status: 'running',
+        created_at: '2026-01-01T00:00:00Z', started_at: '2026-01-01T00:00:00Z',
+        finished_at: null, error: null, result: null,
+      };
+      if (path.endsWith('/previews') && init?.method === 'POST') return response(preview, 202);
+      if (path.endsWith('/previews/preview-1')) return response({
+        ...preview, status: 'completed', finished_at: '2026-01-01T00:00:01Z',
+        result: {
+          outputs: { output: {
+            kind: 'table', total_rows: 1, truncated: false, metadata: {},
+            schema: [{ name: 'total', type: 'int64', nullable: true }], rows: [{ total: 13 }],
+          } },
+          node_timings: {}, datafusion_metrics: [], metadata: {},
+        },
+      });
+      throw new Error(`Unexpected request ${path}`);
+    });
+    vi.stubGlobal('fetch', withSession(fetchMock));
+    render(<App />);
+    await screen.findByText('Build the flow');
+    commitDataSourceText('sample', '[{"a":10,"b":3}]');
+    const run = screen.getByRole('button', { name: 'Run batch' });
+    expect(run).toBeEnabled();
+    fireEvent.click(run);
+    expect(await screen.findByRole('cell', { name: '13' })).toBeInTheDocument();
+    expect(savedProject.data_sources[0]?.data).toEqual([{ a: 10, b: 3 }]);
+    expect(run).toBeEnabled();
+    expect(fetchMock.mock.calls.some(([path]) => String(path).endsWith('/jobs'))).toBe(false);
+  });
   it('aborts pending initialization requests when the app unmounts', async () => {
     const fetchMock = vi.fn<typeof fetch>(
       () => new Promise<Response>(() => undefined),
@@ -296,7 +337,11 @@ describe('Calc Flow Studio', () => {
 
     await screen.findByText('Build the flow');
     expect(screen.queryByRole('button', { name: /Stream Join/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Snapshot SQL/i })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Stream' }));
+    fireEvent.click(screen.getByRole('button', { name: /Snapshot SQL/i }));
+    expect(screen.getByLabelText('DataFusion SQL')).toHaveValue('SELECT * FROM input');
+    expect(screen.getByLabelText('Input alias 1')).toHaveValue('input');
     fireEvent.click(screen.getByRole('button', { name: /Stream Join/i }));
 
     expect(screen.getByLabelText('before micros')).toHaveValue(0);

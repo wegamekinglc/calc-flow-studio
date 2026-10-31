@@ -378,6 +378,10 @@ class JobCreateRequest(StrictModel):
     project_id: str = Field(min_length=1, max_length=120)
 
 
+class PreviewCreateRequest(StrictModel):
+    project_id: str = Field(min_length=1, max_length=120)
+
+
 class ProjectCreateRequest(ProjectDocument):
     def to_project(self) -> ProjectDocument:
         return ProjectDocument.model_validate(self.root)

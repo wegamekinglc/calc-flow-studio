@@ -1,6 +1,49 @@
 {
   "components": {
     "schemas": {
+      "ArrayOutputPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "backend": {
+            "title": "Backend",
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+          },
+          "kind": {
+            "const": "array",
+            "default": "array",
+            "title": "Kind",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+            },
+            "title": "Metadata",
+            "type": "object"
+          },
+          "total_rows": {
+            "minimum": 0.0,
+            "title": "Total Rows",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "backend",
+          "total_rows",
+          "truncated",
+          "data",
+          "metadata"
+        ],
+        "title": "ArrayOutputPreview",
+        "type": "object"
+      },
       "CancelledJobResponse": {
         "additionalProperties": false,
         "properties": {
@@ -60,6 +103,63 @@
           "finished_at"
         ],
         "title": "CancelledJobResponse",
+        "type": "object"
+      },
+      "CancelledRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "null"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "title": "Finished At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "null"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "status": {
+            "const": "cancelled",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status",
+          "finished_at"
+        ],
+        "title": "CancelledRunResponse",
         "type": "object"
       },
       "CapabilitiesResponse": {
@@ -165,6 +265,57 @@
           "finished_at"
         ],
         "title": "CompletedJobResponse",
+        "type": "object"
+      },
+      "CompletedRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "null"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "title": "Finished At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/RunResultPreview"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "const": "completed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status",
+          "started_at",
+          "finished_at",
+          "result"
+        ],
+        "title": "CompletedRunResponse",
         "type": "object"
       },
       "ConnectorAxesResponse": {
@@ -287,6 +438,400 @@
         "title": "ConnectorCapabilityResponse",
         "type": "object"
       },
+      "DataFusionMetricPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "active_entities": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Entities"
+          },
+          "active_entities_source": {
+            "title": "Active Entities Source",
+            "type": "string"
+          },
+          "audit_ns": {
+            "minimum": 0.0,
+            "title": "Audit Ns",
+            "type": "integer"
+          },
+          "available_parallelism": {
+            "minimum": 1.0,
+            "title": "Available Parallelism",
+            "type": "integer"
+          },
+          "batch_envelope_ns": {
+            "minimum": 0.0,
+            "title": "Batch Envelope Ns",
+            "type": "integer"
+          },
+          "coalesce_operator_count": {
+            "minimum": 0.0,
+            "title": "Coalesce Operator Count",
+            "type": "integer"
+          },
+          "collect_ns": {
+            "minimum": 0.0,
+            "title": "Collect Ns",
+            "type": "integer"
+          },
+          "configured_batch_size": {
+            "minimum": 1.0,
+            "title": "Configured Batch Size",
+            "type": "integer"
+          },
+          "configured_target_partitions": {
+            "minimum": 1.0,
+            "title": "Configured Target Partitions",
+            "type": "integer"
+          },
+          "decision_active_entities": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Active Entities"
+          },
+          "decision_active_entities_source": {
+            "title": "Decision Active Entities Source",
+            "type": "string"
+          },
+          "decision_input_rows": {
+            "minimum": 0.0,
+            "title": "Decision Input Rows",
+            "type": "integer"
+          },
+          "diagnostics_collected": {
+            "title": "Diagnostics Collected",
+            "type": "boolean"
+          },
+          "effective_target_partitions": {
+            "minimum": 1.0,
+            "title": "Effective Target Partitions",
+            "type": "integer"
+          },
+          "elapsed_compute_ns": {
+            "minimum": 0.0,
+            "title": "Elapsed Compute Ns",
+            "type": "integer"
+          },
+          "execution_ns": {
+            "minimum": 0.0,
+            "title": "Execution Ns",
+            "type": "integer"
+          },
+          "execution_remaining_ns": {
+            "minimum": 0.0,
+            "title": "Execution Remaining Ns",
+            "type": "integer"
+          },
+          "execution_to_first_batch_ns": {
+            "minimum": 0.0,
+            "title": "Execution To First Batch Ns",
+            "type": "integer"
+          },
+          "input_adapter_ns": {
+            "minimum": 0.0,
+            "title": "Input Adapter Ns",
+            "type": "integer"
+          },
+          "input_rows": {
+            "minimum": 0.0,
+            "title": "Input Rows",
+            "type": "integer"
+          },
+          "logical_plan": {
+            "title": "Logical Plan",
+            "type": "string"
+          },
+          "logical_plan_string_ns": {
+            "minimum": 0.0,
+            "title": "Logical Plan String Ns",
+            "type": "integer"
+          },
+          "logical_planning_ns": {
+            "minimum": 0.0,
+            "title": "Logical Planning Ns",
+            "type": "integer"
+          },
+          "max_partitions": {
+            "minimum": 1.0,
+            "title": "Max Partitions",
+            "type": "integer"
+          },
+          "metrics_traversal_ns": {
+            "minimum": 0.0,
+            "title": "Metrics Traversal Ns",
+            "type": "integer"
+          },
+          "min_rows_per_partition": {
+            "minimum": 1.0,
+            "title": "Min Rows Per Partition",
+            "type": "integer"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "output_arrow_wrap_ns": {
+            "minimum": 0.0,
+            "title": "Output Arrow Wrap Ns",
+            "type": "integer"
+          },
+          "output_partition_count": {
+            "minimum": 0.0,
+            "title": "Output Partition Count",
+            "type": "integer"
+          },
+          "output_partition_rows": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Output Partition Rows",
+            "type": "array"
+          },
+          "output_rows": {
+            "minimum": 0.0,
+            "title": "Output Rows",
+            "type": "integer"
+          },
+          "parallelism_decision_reused": {
+            "title": "Parallelism Decision Reused",
+            "type": "boolean"
+          },
+          "parallelism_mode": {
+            "enum": [
+              "fixed",
+              "auto"
+            ],
+            "title": "Parallelism Mode",
+            "type": "string"
+          },
+          "partition_limit_reason": {
+            "title": "Partition Limit Reason",
+            "type": "string"
+          },
+          "physical_metric_count": {
+            "minimum": 0.0,
+            "title": "Physical Metric Count",
+            "type": "integer"
+          },
+          "physical_plan": {
+            "title": "Physical Plan",
+            "type": "string"
+          },
+          "physical_plan_string_ns": {
+            "minimum": 0.0,
+            "title": "Physical Plan String Ns",
+            "type": "integer"
+          },
+          "physical_planning_count": {
+            "minimum": 1.0,
+            "title": "Physical Planning Count",
+            "type": "integer"
+          },
+          "physical_planning_ns": {
+            "minimum": 0.0,
+            "title": "Physical Planning Ns",
+            "type": "integer"
+          },
+          "planning_ns": {
+            "minimum": 0.0,
+            "title": "Planning Ns",
+            "type": "integer"
+          },
+          "query_id": {
+            "minimum": 0.0,
+            "title": "Query Id",
+            "type": "integer"
+          },
+          "repartition_operator_count": {
+            "minimum": 0.0,
+            "title": "Repartition Operator Count",
+            "type": "integer"
+          },
+          "repartition_sort_compute_ns": {
+            "minimum": 0.0,
+            "title": "Repartition Sort Compute Ns",
+            "type": "integer"
+          },
+          "requested_target_partitions": {
+            "minimum": 1.0,
+            "title": "Requested Target Partitions",
+            "type": "integer"
+          },
+          "rolling_candidate_windows": {
+            "minimum": 0.0,
+            "title": "Rolling Candidate Windows",
+            "type": "integer"
+          },
+          "rolling_fallback_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rolling Fallback Reasons",
+            "type": "array"
+          },
+          "rolling_rewrite_enabled": {
+            "title": "Rolling Rewrite Enabled",
+            "type": "boolean"
+          },
+          "rolling_rewritten_windows": {
+            "minimum": 0.0,
+            "title": "Rolling Rewritten Windows",
+            "type": "integer"
+          },
+          "run_result_ns": {
+            "minimum": 0.0,
+            "title": "Run Result Ns",
+            "type": "integer"
+          },
+          "runtime_acquire_ns": {
+            "minimum": 0.0,
+            "title": "Runtime Acquire Ns",
+            "type": "integer"
+          },
+          "session_state_create_ns": {
+            "minimum": 0.0,
+            "title": "Session State Create Ns",
+            "type": "integer"
+          },
+          "small_rows_threshold": {
+            "minimum": 1.0,
+            "title": "Small Rows Threshold",
+            "type": "integer"
+          },
+          "sort_operator_count": {
+            "minimum": 0.0,
+            "title": "Sort Operator Count",
+            "type": "integer"
+          },
+          "spill_bytes": {
+            "minimum": 0.0,
+            "title": "Spill Bytes",
+            "type": "integer"
+          },
+          "sql_parse_ns": {
+            "minimum": 0.0,
+            "title": "Sql Parse Ns",
+            "type": "integer"
+          },
+          "stream_open_ns": {
+            "minimum": 0.0,
+            "title": "Stream Open Ns",
+            "type": "integer"
+          },
+          "table_register_ns": {
+            "minimum": 0.0,
+            "title": "Table Register Ns",
+            "type": "integer"
+          },
+          "window_compute_ns": {
+            "minimum": 0.0,
+            "title": "Window Compute Ns",
+            "type": "integer"
+          },
+          "window_operator_count": {
+            "minimum": 0.0,
+            "title": "Window Operator Count",
+            "type": "integer"
+          },
+          "window_partition_count": {
+            "minimum": 0.0,
+            "title": "Window Partition Count",
+            "type": "integer"
+          },
+          "window_partition_rows": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Window Partition Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "query_id",
+          "node_id",
+          "runtime_acquire_ns",
+          "session_state_create_ns",
+          "input_adapter_ns",
+          "table_register_ns",
+          "sql_parse_ns",
+          "logical_planning_ns",
+          "physical_planning_ns",
+          "physical_planning_count",
+          "planning_ns",
+          "stream_open_ns",
+          "execution_to_first_batch_ns",
+          "execution_remaining_ns",
+          "execution_ns",
+          "collect_ns",
+          "output_arrow_wrap_ns",
+          "audit_ns",
+          "metrics_traversal_ns",
+          "logical_plan_string_ns",
+          "physical_plan_string_ns",
+          "batch_envelope_ns",
+          "run_result_ns",
+          "physical_metric_count",
+          "output_partition_count",
+          "output_partition_rows",
+          "window_partition_count",
+          "window_partition_rows",
+          "spill_bytes",
+          "elapsed_compute_ns",
+          "window_compute_ns",
+          "repartition_sort_compute_ns",
+          "window_operator_count",
+          "repartition_operator_count",
+          "sort_operator_count",
+          "coalesce_operator_count",
+          "output_rows",
+          "configured_batch_size",
+          "parallelism_mode",
+          "configured_target_partitions",
+          "requested_target_partitions",
+          "effective_target_partitions",
+          "available_parallelism",
+          "max_partitions",
+          "min_rows_per_partition",
+          "small_rows_threshold",
+          "parallelism_decision_reused",
+          "decision_input_rows",
+          "decision_active_entities_source",
+          "input_rows",
+          "active_entities_source",
+          "partition_limit_reason",
+          "rolling_rewrite_enabled",
+          "diagnostics_collected",
+          "rolling_candidate_windows",
+          "rolling_rewritten_windows",
+          "rolling_fallback_reasons",
+          "logical_plan",
+          "physical_plan"
+        ],
+        "title": "DataFusionMetricPreview",
+        "type": "object"
+      },
       "ExecutionModeValue": {
         "enum": [
           "batch",
@@ -362,6 +907,59 @@
         "title": "FailedJobResponse",
         "type": "object"
       },
+      "FailedRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "minLength": 1,
+            "title": "Error",
+            "type": "string"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "title": "Finished At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "null"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "const": "failed",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status",
+          "started_at",
+          "finished_at",
+          "error"
+        ],
+        "title": "FailedRunResponse",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -432,37 +1030,6 @@
           {
             "additionalProperties": {
               "$ref": "#/components/schemas/JSONValue-Input"
-            },
-            "type": "object"
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
-      "JSONValue-Output": {
-        "anyOf": [
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "integer"
-          },
-          {
-            "type": "number"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "items": {
-              "$ref": "#/components/schemas/JSONValue-Output"
-            },
-            "type": "array"
-          },
-          {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/JSONValue-Output"
             },
             "type": "object"
           },
@@ -591,6 +1158,37 @@
         "title": "LazyBuiltinWorkerRegistration",
         "type": "object"
       },
+      "NodeTimingPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "duration_ns": {
+            "minimum": 0.0,
+            "title": "Duration Ns",
+            "type": "integer"
+          },
+          "input_rows": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Input Rows",
+            "type": "object"
+          },
+          "output_rows": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Output Rows",
+            "type": "object"
+          }
+        },
+        "required": [
+          "duration_ns",
+          "input_rows",
+          "output_rows"
+        ],
+        "title": "NodeTimingPreview",
+        "type": "object"
+      },
       "OperatorCapabilityResponse": {
         "additionalProperties": false,
         "properties": {
@@ -694,6 +1292,30 @@
         "title": "OperatorCapabilityResponse",
         "type": "object"
       },
+      "OutputFieldPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "nullable": {
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "nullable"
+        ],
+        "title": "OutputFieldPreview",
+        "type": "object"
+      },
       "OutputFinalityValue": {
         "enum": [
           "per_row_final",
@@ -701,6 +1323,23 @@
           "unproven"
         ],
         "type": "string"
+      },
+      "OutputPreview": {
+        "discriminator": {
+          "mapping": {
+            "array": "#/components/schemas/ArrayOutputPreview",
+            "table": "#/components/schemas/TableOutputPreview"
+          },
+          "propertyName": "kind"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TableOutputPreview"
+          },
+          {
+            "$ref": "#/components/schemas/ArrayOutputPreview"
+          }
+        ]
       },
       "PendingJobResponse": {
         "additionalProperties": false,
@@ -751,6 +1390,53 @@
           "status"
         ],
         "title": "PendingJobResponse",
+        "type": "object"
+      },
+      "PendingRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "null"
+          },
+          "finished_at": {
+            "title": "Finished At",
+            "type": "null"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "null"
+          },
+          "started_at": {
+            "title": "Started At",
+            "type": "null"
+          },
+          "status": {
+            "const": "pending",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status"
+        ],
+        "title": "PendingRunResponse",
         "type": "object"
       },
       "PreviewCapabilitiesResponse": {
@@ -811,6 +1497,22 @@
           "limits"
         ],
         "title": "PreviewCapabilitiesResponse",
+        "type": "object"
+      },
+      "PreviewCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "project_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Project Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "title": "PreviewCreateRequest",
         "type": "object"
       },
       "PreviewLimit": {
@@ -1799,7 +2501,7 @@
               },
               {
                 "const": "auto",
-                "description": "Choose a conservative partition count from host capacity, row count,\nand trusted input entity statistics.",
+                "description": "Choose a partition count from host capacity and input work. Batch graphs\ncontaining multi-input SQL use the external table row count; other\nruntimes also require trusted input entity statistics.",
                 "type": "string"
               }
             ]
@@ -2126,6 +2828,38 @@
                   },
                   "kind": {
                     "const": "sql",
+                    "type": "string"
+                  },
+                  "query": {
+                    "type": "string"
+                  },
+                  "udfs": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/ProjectCreateRequest/$defs/UdfReference"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "query",
+                  "aliases"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Complete-relation replacement SQL for stream graphs.",
+                "properties": {
+                  "aliases": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "kind": {
+                    "const": "snapshot_sql",
                     "type": "string"
                   },
                   "query": {
@@ -2971,6 +3705,166 @@
               },
               {
                 "additionalProperties": false,
+                "description": "Checked sum of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_sum",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Minimum of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_min",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Maximum of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_max",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Online variance of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "ddof": {
+                    "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
+                    "format": "uint8",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "type": "integer"
+                  },
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_variance",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods",
+                  "ddof"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
                 "description": "Valid (non-null, non-NaN) sample count over the frame (SCE-00 D3,\ncontract section 5.2).",
                 "properties": {
                   "frame": {
@@ -3744,7 +4638,7 @@
                 "type": "array"
               },
               "state_layout_version": {
-                "description": "Durable state-layout version. Existing primitives use\n[`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires\n[`ROLLING_EWMA_STATE_LAYOUT_VERSION`].",
+                "description": "Durable state-layout version. Existing primitives use\n[`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires\n[`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance\nrequire [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].",
                 "format": "uint32",
                 "minimum": 0.0,
                 "type": "integer"
@@ -4111,7 +5005,7 @@
           },
           "StreamRunOptions": {
             "additionalProperties": false,
-            "description": "Continuous runtime limits carried by project v3.",
+            "description": "Continuous runtime limits carried by project v3.\n\nOmitted JSON fields retain the project-v3 defaults for stable document\nfingerprints. [`Self::default`] uses current runtime defaults, which\nserialize explicitly.",
             "properties": {
               "checkpoint_interval_ms": {
                 "default": 30000,
@@ -4122,7 +5016,6 @@
               "max_batch_bytes": {
                 "default": 67108864,
                 "format": "uint",
-                "maximum": 268435456.0,
                 "minimum": 1.0,
                 "type": "integer"
               },
@@ -5259,7 +6152,7 @@
               },
               {
                 "const": "auto",
-                "description": "Choose a conservative partition count from host capacity, row count,\nand trusted input entity statistics.",
+                "description": "Choose a partition count from host capacity and input work. Batch graphs\ncontaining multi-input SQL use the external table row count; other\nruntimes also require trusted input entity statistics.",
                 "type": "string"
               }
             ]
@@ -5586,6 +6479,38 @@
                   },
                   "kind": {
                     "const": "sql",
+                    "type": "string"
+                  },
+                  "query": {
+                    "type": "string"
+                  },
+                  "udfs": {
+                    "default": [],
+                    "items": {
+                      "$ref": "#/components/schemas/ProjectDocument/$defs/UdfReference"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "query",
+                  "aliases"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Complete-relation replacement SQL for stream graphs.",
+                "properties": {
+                  "aliases": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "kind": {
+                    "const": "snapshot_sql",
                     "type": "string"
                   },
                   "query": {
@@ -6431,6 +7356,166 @@
               },
               {
                 "additionalProperties": false,
+                "description": "Checked sum of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_sum",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Minimum of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_min",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Maximum of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_max",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
+                "description": "Online variance of every valid numeric sample seen for an entity.",
+                "properties": {
+                  "ddof": {
+                    "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
+                    "format": "uint8",
+                    "maximum": 1.0,
+                    "minimum": 0.0,
+                    "type": "integer"
+                  },
+                  "input": {
+                    "description": "Numeric input column name.",
+                    "type": "string"
+                  },
+                  "kind": {
+                    "const": "cumulative_variance",
+                    "type": "string"
+                  },
+                  "min_periods": {
+                    "description": "Positive minimum valid sample count.",
+                    "format": "uint64",
+                    "minimum": 1.0,
+                    "type": "integer"
+                  },
+                  "output": {
+                    "description": "Output column name.",
+                    "type": "string"
+                  },
+                  "primitive_version": {
+                    "description": "Primitive version; must equal `1`.",
+                    "format": "uint32",
+                    "minimum": 0.0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "primitive_version",
+                  "input",
+                  "output",
+                  "min_periods",
+                  "ddof"
+                ],
+                "type": "object"
+              },
+              {
+                "additionalProperties": false,
                 "description": "Valid (non-null, non-NaN) sample count over the frame (SCE-00 D3,\ncontract section 5.2).",
                 "properties": {
                   "frame": {
@@ -7204,7 +8289,7 @@
                 "type": "array"
               },
               "state_layout_version": {
-                "description": "Durable state-layout version. Existing primitives use\n[`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires\n[`ROLLING_EWMA_STATE_LAYOUT_VERSION`].",
+                "description": "Durable state-layout version. Existing primitives use\n[`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires\n[`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance\nrequire [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].",
                 "format": "uint32",
                 "minimum": 0.0,
                 "type": "integer"
@@ -7571,7 +8656,7 @@
           },
           "StreamRunOptions": {
             "additionalProperties": false,
-            "description": "Continuous runtime limits carried by project v3.",
+            "description": "Continuous runtime limits carried by project v3.\n\nOmitted JSON fields retain the project-v3 defaults for stable document\nfingerprints. [`Self::default`] uses current runtime defaults, which\nserialize explicitly.",
             "properties": {
               "checkpoint_interval_ms": {
                 "default": 30000,
@@ -7582,7 +8667,6 @@
               "max_batch_bytes": {
                 "default": 67108864,
                 "format": "uint",
-                "maximum": 268435456.0,
                 "minimum": 1.0,
                 "type": "integer"
               },
@@ -8327,6 +9411,84 @@
         "title": "RunEvent",
         "type": "object"
       },
+      "RunResponse": {
+        "$ref": "#/components/schemas/RunResponseVariant",
+        "title": "RunResponse"
+      },
+      "RunResponseVariant": {
+        "discriminator": {
+          "mapping": {
+            "cancelled": "#/components/schemas/CancelledRunResponse",
+            "completed": "#/components/schemas/CompletedRunResponse",
+            "failed": "#/components/schemas/FailedRunResponse",
+            "pending": "#/components/schemas/PendingRunResponse",
+            "running": "#/components/schemas/RunningRunResponse",
+            "timed_out": "#/components/schemas/TimedOutRunResponse"
+          },
+          "propertyName": "status"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PendingRunResponse"
+          },
+          {
+            "$ref": "#/components/schemas/RunningRunResponse"
+          },
+          {
+            "$ref": "#/components/schemas/CompletedRunResponse"
+          },
+          {
+            "$ref": "#/components/schemas/FailedRunResponse"
+          },
+          {
+            "$ref": "#/components/schemas/TimedOutRunResponse"
+          },
+          {
+            "$ref": "#/components/schemas/CancelledRunResponse"
+          }
+        ]
+      },
+      "RunResultPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "datafusion_metrics": {
+            "items": {
+              "$ref": "#/components/schemas/DataFusionMetricPreview"
+            },
+            "title": "Datafusion Metrics",
+            "type": "array"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+            },
+            "title": "Metadata",
+            "type": "object"
+          },
+          "node_timings": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/NodeTimingPreview"
+            },
+            "title": "Node Timings",
+            "type": "object"
+          },
+          "outputs": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/OutputPreview"
+            },
+            "title": "Outputs",
+            "type": "object"
+          }
+        },
+        "required": [
+          "outputs",
+          "node_timings",
+          "datafusion_metrics",
+          "metadata"
+        ],
+        "title": "RunResultPreview",
+        "type": "object"
+      },
       "RunningJobResponse": {
         "additionalProperties": false,
         "properties": {
@@ -8378,6 +9540,55 @@
           "started_at"
         ],
         "title": "RunningJobResponse",
+        "type": "object"
+      },
+      "RunningRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "null"
+          },
+          "finished_at": {
+            "title": "Finished At",
+            "type": "null"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "null"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "const": "running",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status",
+          "started_at"
+        ],
+        "title": "RunningRunResponse",
         "type": "object"
       },
       "RuntimeCapabilitiesResponse": {
@@ -8797,6 +10008,112 @@
         ],
         "type": "string"
       },
+      "TableOutputPreview": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "table",
+            "default": "table",
+            "title": "Kind",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+            },
+            "title": "Metadata",
+            "type": "object"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": {
+                "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+              },
+              "type": "object"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "schema": {
+            "items": {
+              "$ref": "#/components/schemas/OutputFieldPreview"
+            },
+            "title": "Schema",
+            "type": "array"
+          },
+          "total_rows": {
+            "minimum": 0.0,
+            "title": "Total Rows",
+            "type": "integer"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "total_rows",
+          "truncated",
+          "schema",
+          "rows",
+          "metadata"
+        ],
+        "title": "TableOutputPreview",
+        "type": "object"
+      },
+      "TimedOutRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "error": {
+            "minLength": 1,
+            "title": "Error",
+            "type": "string"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "title": "Finished At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "project_id": {
+            "title": "Project Id",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "null"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "const": "timed_out",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "created_at",
+          "status",
+          "started_at",
+          "finished_at",
+          "error"
+        ],
+        "title": "TimedOutRunResponse",
+        "type": "object"
+      },
       "UdfCapabilityResponse": {
         "additionalProperties": false,
         "properties": {
@@ -9030,6 +10347,68 @@
           },
           {
             "$ref": "#/components/schemas/UnavailableWorkerRegistration"
+          }
+        ]
+      },
+      "calc_flow__config__JSONValue-Output": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/calc_flow__config__JSONValue-Output"
+            },
+            "type": "array"
+          },
+          {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/calc_flow__config__JSONValue-Output"
+            },
+            "type": "object"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "calc_flow_studio__models__JSONValue": {
+        "anyOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+            },
+            "type": "array"
+          },
+          {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+            },
+            "type": "object"
+          },
+          {
+            "type": "null"
           }
         ]
       }
@@ -9350,6 +10729,120 @@
           }
         },
         "summary": "Shutdown Job"
+      }
+    },
+    "/api/v3/previews": {
+      "post": {
+        "operationId": "create_preview_api_v3_previews_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectInvalidResponse"
+                }
+              }
+            },
+            "description": "Invalid project document or request"
+          }
+        },
+        "summary": "Create Preview"
+      }
+    },
+    "/api/v3/previews/{preview_id}": {
+      "delete": {
+        "operationId": "cancel_preview_api_v3_previews__preview_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "preview_id",
+            "required": true,
+            "schema": {
+              "title": "Preview Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Preview"
+      },
+      "get": {
+        "operationId": "get_preview_api_v3_previews__preview_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "preview_id",
+            "required": true,
+            "schema": {
+              "title": "Preview Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Preview"
       }
     },
     "/api/v3/projects": {

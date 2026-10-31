@@ -7,10 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  # Pinned calc-flow commit that carries the public Runtime registration API.
-  # Once a calc-flow-python release after 2026.10.12 is on PyPI, the jobs below
-  # can install the core wheel from PyPI instead of building this commit.
-  CALC_FLOW_CORE_REF: 1d2ac908aff0b4bf80e39dec4e0eb68e0c513a7d
+  # Build the exact core revision covered by Studio's project and API contracts.
+  CALC_FLOW_CORE_REF: 061b33f626231f842654bc24cca37fb251df2db1
 
 jobs:
   core-wheel:
@@ -216,35 +214,37 @@ jobs:
         run: |
           uv venv /tmp/calc-flow-studio-wheel
           uv pip install --python /tmp/calc-flow-studio-wheel/bin/python \
-            dist/calc_flow_python-*.whl dist/calc_flow_studio-*.whl
+            dist/calc_flow_python-*.whl dist/calc_flow_studio-*.whl packaging
           test -x /tmp/calc-flow-studio-wheel/bin/calc-flow-web
           /tmp/calc-flow-studio-wheel/bin/python - <<'PY'
-          from importlib.metadata import requires
+          from importlib.metadata import requires, version
           from pathlib import Path
 
           import calc_flow
           import calc_flow_studio
           import tomllib
+          from packaging.requirements import Requirement
 
           app = calc_flow_studio.create_app()
           paths = [route.path for route in app.routes]
           assert "/api/v3/catalog" in app.openapi()["paths"]
+          assert "/api/v3/previews" in app.openapi()["paths"]
           assert "/" in paths
           assert "/assets" in paths
           assert not hasattr(calc_flow, "web")
           with Path("web-ui/backend/pyproject.toml").open("rb") as stream:
-              version = tomllib.load(stream)["project"]["version"]
-          upper_bound = f"<{int(version.split('.')[0]) + 1}"
+              project = tomllib.load(stream)["project"]
+          assert version("calc-flow-studio") == project["version"]
+          expected_core = next(
+              Requirement(item) for item in project["dependencies"]
+              if Requirement(item).name == "calc-flow-python"
+          )
           core_requirements = requires("calc-flow-python") or []
           studio_requirements = requires("calc-flow-studio") or []
           assert not any("fastapi" in item.lower() for item in core_requirements)
           assert not any("uvicorn" in item.lower() for item in core_requirements)
-          assert any(
-              item.lower().startswith("calc-flow-python")
-              and f">={version}" in item
-              and upper_bound in item
-              for item in studio_requirements
-          )
+          assert expected_core in [Requirement(item) for item in studio_requirements]
+          assert version("calc-flow-python") in expected_core.specifier
           index = next(route for route in app.routes if route.path == "/").endpoint()
           assert Path(index.path).is_file()
           PY

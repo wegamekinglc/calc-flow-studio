@@ -193,12 +193,12 @@ label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weig
 .canvas-meta span { padding: 5px 8px; border: 1px solid var(--line); border-radius: 20px; color: var(--muted); background: #0a1917e8; font-size: 9px; }
 .react-flow__node-calculation { width: 168px !important; color: #e9f5f0; font: 600 11px 'SFMono-Regular', Consolas, ui-monospace, monospace; }
 .calculation-node { position: relative; padding: 13px; border: 1px solid #3e6459; border-radius: 11px; background: linear-gradient(145deg, #17332c, #10231f); box-shadow: 0 14px 35px #0005; }
-.calculation-node.sql { border-color: #88583a; }
+.calculation-node.sql, .calculation-node.snapshot_sql { border-color: #88583a; }
 .calculation-node.stream_join { border-color: #3e7188; }
 .calculation-node.external { border-color: #61558f; }
 .calculation-node.selected { outline: 2px solid var(--mint); outline-offset: 2px; }
 .calculation-node .node-kind { display: inline-block; margin-bottom: 8px; padding: 3px 5px; border-radius: 5px; color: #082019; background: var(--mint); font-size: 8px; }
-.calculation-node.sql .node-kind { background: var(--orange); }
+.calculation-node.sql .node-kind, .calculation-node.snapshot_sql .node-kind { background: var(--orange); }
 .calculation-node.stream_join .node-kind { background: #56a8d5; }
 .calculation-node.external .node-kind { background: var(--violet); }
 .calculation-node strong, .calculation-node small { display: block; }
@@ -216,7 +216,7 @@ label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weig
 .panel-resize-handle:active::after { background: var(--orange); }
 .panel-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 16px; }
 .kind-chip, .status-pill { padding: 5px 7px; border: 1px solid #31705f; border-radius: 20px; color: var(--mint); background: var(--mint-deep); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-.kind-chip.sql { color: var(--orange); border-color: #74482f; background: #342318; }
+.kind-chip.sql, .kind-chip.snapshot_sql { color: var(--orange); border-color: #74482f; background: #342318; }
 .kind-chip.external { color: var(--violet); border-color: #574c7f; background: #25203a; }
 .inspector > label { margin-bottom: 12px; }
 .input-alias-editor { display: grid; gap: 8px; margin-bottom: 12px; }

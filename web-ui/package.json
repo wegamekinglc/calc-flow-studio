@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "generate:api": "node scripts/generate_api.mjs",
-    "sync:api": "UV_CACHE_DIR=/tmp/calc-flow-web-uv-cache uv run --project backend python scripts/export_openapi.py && npm run generate:api",
+    "sync:api": "UV_CACHE_DIR=/tmp/calc-flow-web-uv-cache uv run --no-sync --project backend python scripts/export_openapi.py && npm run generate:api",
     "benchmark": "vitest bench --run"
   },
   "dependencies": {

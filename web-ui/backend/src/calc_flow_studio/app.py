@@ -28,6 +28,7 @@ from calc_flow_studio.routes import (
     RuntimeProtocol,
     register_capability_routes,
     register_job_routes,
+    register_preview_routes,
     register_project_routes,
 )
 from calc_flow_studio.run_manager import RunManager
@@ -205,6 +206,7 @@ def create_app(
 
     register_capability_routes(app, selected_runtime, selected_run_manager)
     register_project_routes(app, projects, selected_runtime)
+    register_preview_routes(app, projects, selected_run_manager, selected_runtime)
     register_job_routes(app, projects, selected_run_manager, selected_runtime)
     app.openapi = partial(project_openapi, app)
 

@@ -20,7 +20,7 @@ export const hasLateOutput = (node: NodeConfig): boolean =>
 
 export const derivedInputNames = (node: NodeConfig): string[] => {
   if (node.input_ports.length) return node.input_ports.map((port) => port.name);
-  if (node.operator.kind === 'sql') return node.operator.aliases;
+  if (node.operator.kind === 'sql' || node.operator.kind === 'snapshot_sql') return node.operator.aliases;
   if (node.operator.kind === 'expression') return ['input'];
   return [];
 };

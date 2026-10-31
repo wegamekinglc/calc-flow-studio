@@ -15,3 +15,6 @@ web-ui/playwright-report
 web-ui/test-results
 .calc-flow-web/
 .calc-flow-projects/
+.calc-flow-checkpoints/
+.calc-flow-input/
+.calc-flow-output/

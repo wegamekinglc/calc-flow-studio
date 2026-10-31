@@ -27,7 +27,7 @@ interface NodeInspectorProps {
 }
 
 type ExpressionOperator = Extract<OperatorSpec, { kind: 'expression' }>;
-type SqlOperator = Extract<OperatorSpec, { kind: 'sql' }>;
+type SqlOperator = Extract<OperatorSpec, { kind: 'sql' | 'snapshot_sql' }>;
 type StreamJoinOperator = Extract<OperatorSpec, { kind: 'stream_join' }>;
 type StreamJoinBounds = StreamJoinOperator['spec']['bounds'];
 type StreamJoinLimits = StreamJoinOperator['spec']['limits'];
@@ -95,7 +95,7 @@ export function NodeInspector({
     patchNode({ operator: { ...node.operator, ...change } });
   };
   const patchSql = (change: Partial<SqlOperator>) => {
-    if (node.operator.kind !== 'sql') return;
+    if (node.operator.kind !== 'sql' && node.operator.kind !== 'snapshot_sql') return;
     patchNode({ operator: { ...node.operator, ...change } });
   };
   const patchStreamJoin = (change: Partial<StreamJoinOperator['spec']>) => {
@@ -108,7 +108,7 @@ export function NodeInspector({
     node.operator.kind !== 'external'
     || ![...node.input_ports, ...node.output_ports].some((port) => port.kind === 'array');
   const matchingUdfs =
-    node.operator.kind === 'expression' || node.operator.kind === 'sql'
+    node.operator.kind === 'expression' || node.operator.kind === 'sql' || node.operator.kind === 'snapshot_sql'
       ? udfs
       : [];
   const streamJoin = node.operator.kind === 'stream_join' ? node.operator : null;
@@ -141,7 +141,7 @@ export function NodeInspector({
   };
 
   const toggleUdf = (entry: UdfCatalogEntry, checked: boolean) => {
-    if (node.operator.kind !== 'expression' && node.operator.kind !== 'sql') return;
+    if (node.operator.kind !== 'expression' && node.operator.kind !== 'sql' && node.operator.kind !== 'snapshot_sql') return;
     const reference: UdfReference = {
       provider: entry.provider,
       name: entry.name,
@@ -201,8 +201,11 @@ export function NodeInspector({
         </>
       )}
 
-      {node.operator.kind === 'sql' && (
+      {(node.operator.kind === 'sql' || node.operator.kind === 'snapshot_sql') && (
         <>
+          {node.operator.kind === 'snapshot_sql' && (
+            <p className="muted">Each input replaces its complete relation. Connect the output directly to a sink.</p>
+          )}
           <InputAliasEditor
             aliases={node.operator.aliases}
             onAdd={() => onSqlAliasEdit({ type: 'add' })}
@@ -345,7 +348,7 @@ export function NodeInspector({
         {matchingUdfs.length === 0 && <p className="muted">No compatible UDFs installed.</p>}
         {matchingUdfs.map((entry) => {
           const operatorUdfs =
-            node.operator.kind === 'expression' || node.operator.kind === 'sql'
+            node.operator.kind === 'expression' || node.operator.kind === 'sql' || node.operator.kind === 'snapshot_sql'
               ? node.operator.udfs
               : [];
           const checked = operatorUdfs.some(

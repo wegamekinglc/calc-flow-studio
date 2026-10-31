@@ -87,6 +87,23 @@ const staticWeights = (
 });
 
 describe('lowered ProjectDocument inspection', () => {
+  it('shows the query and replacement state of a snapshot SQL project', () => {
+    const node = {
+      id: 'snapshot',
+      input_ports: [],
+      output_ports: [],
+      position: { x: 0, y: 0 },
+      operator: {
+        kind: 'snapshot_sql',
+        query: 'SELECT SUM(value) AS total FROM input',
+        aliases: ['input'],
+        udfs: [],
+      },
+    } satisfies NodeConfig;
+    const inspection = inspectLoweredNode(projectWith(node), node);
+    expect(inspection.sourceExpressions).toEqual([node.operator.query]);
+    expect(inspection.state).toContain('replacement state');
+  });
 
   it('shows ASOF state limits, strict finality and the complete declaration', () => {
     const node: NodeConfig = {

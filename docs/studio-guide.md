@@ -1,10 +1,11 @@
 # Studio
 
-[Documentation](../README.md) / 2.7 Studio
+[Documentation](../README.md) / Studio
 
-Calc Flow Studio edits project-v3 documents and operates continuous jobs on a
-local computer. Install and start it using
-[getting started](https://github.com/wegamekinglc/calc-flow/blob/main/docs/getting-started.md#start-and-stop-studio).
+Calc Flow Studio edits project-v3 documents, previews finite batch calculations,
+and operates continuous jobs on a local computer. Install and start it using
+the repository [requirements](../README.md#requirements) and
+[run instructions](../README.md#run).
 The packaged application opens at `http://127.0.0.1:8765`; the managed
 development frontend opens at `http://127.0.0.1:5173`.
 
@@ -23,6 +24,13 @@ For batch input cards, **Edit data** opens a draft editor. **Confirm** applies
 valid input; **Cancel**, Escape, or closing the dialog discards the draft.
 Confirming a card does not save the entire project. See the
 [Studio application guide](../web-ui/README.md#edit-data-sources) for controls.
+
+In **Batch** mode, select **Run batch** to save the confirmed inputs and execute
+the calculation. **Results preview** shows each output's schema, row count,
+bounded rows, and truncation indicator. The initial `total = a + b` example
+returns `3` and `7`. **Cancel batch** stops an active worker; failures and
+timeouts appear in the same panel. Preview limits come from the project's
+batch runtime options.
 
 Schema field names and Source/Sink binding names keep keyboard focus during
 continuous edits. For stream Source/Sink cards, **Options** accepts a JSON
@@ -58,6 +66,41 @@ explicit operational connector and state settings before a job can launch. Repor
 declared limits or estimates; use live metrics to observe memory and latency.
 
 ## Start and observe a continuous job
+
+Stream execution uses connector bindings. Switching from Batch to Stream
+replaces inline input cards with source and sink configuration; choose an
+existing server-side input file instead of relying on the earlier inline data.
+The default `file` connector takes a snapshot and finishes at EOF. Use a
+continuous connector for an ongoing feed.
+
+To run the default graph against a local JSON Lines file, create the input from
+the repository root on Linux, macOS, or WSL:
+
+```bash
+uv run --no-sync --package calc-flow-studio python - <<'PY'
+from pathlib import Path
+
+path = Path(".calc-flow-input/input.json")
+path.parent.mkdir(parents=True, exist_ok=True)
+with path.open("x", encoding="utf-8") as stream:
+    stream.write('{"a":1,"b":2}\n{"a":3,"b":4}\n')
+PY
+```
+
+This command preserves an existing file; choose an unused path in that case. On
+Windows, save the same two UTF-8 JSON Lines records using an editor. In the
+stream settings, use graph name `main-pipeline`, source Options
+`{"path":".calc-flow-input/input.json","format":"json"}`, and sink Options
+`{"path":".calc-flow-output","output":"results"}`. Paths resolve relative to
+the backend's working directory; use absolute paths when starting it elsewhere.
+Select **Start job**. This example reaches `completed` and writes Parquet
+outputs containing totals `3` and `7` beneath `.calc-flow-output`.
+
+Checkpoint storage requires a graph name containing only ASCII letters,
+numbers, dots, underscores, or dashes. Existing projects using `Main pipeline`
+can change **Graph name** to `main-pipeline`. Start-time checks return a `422`
+validation report with `graph.name` or `sources[i].options.path` when the name
+is invalid or a local file source is missing, before a worker starts.
 
 Configure a stream project with the registered sources, sinks, formats,
 watermark policy, delivery requirements, and managed state settings described
@@ -121,7 +164,9 @@ because the REST contract has no field for live static values. Run such a
 project through Python with explicit `static_inputs`, as in
 [example 11](https://github.com/wegamekinglc/calc-flow/blob/main/examples/11_symbolic_static_matrix.py).
 
-Consult the [HTTP API reference](https://github.com/wegamekinglc/calc-flow/blob/main/docs/api-reference.md#local-http-api) for routes and
-the separate [Studio architecture](https://github.com/wegamekinglc/calc-flow/blob/main/docs/design.md#studio-boundary) for ownership.
+Consult the local [HTTP API reference](../web-ui/backend/README.md) for Studio
+routes, the generated `/docs` page for request and response schemas, and
+the [core design](https://github.com/wegamekinglc/calc-flow/blob/main/docs/design.md)
+for runtime ownership.
 
-Next: [API reference](https://github.com/wegamekinglc/calc-flow/blob/main/docs/api-reference.md).
+Next: [Studio API reference](../web-ui/backend/README.md).

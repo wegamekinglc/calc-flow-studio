@@ -18,6 +18,7 @@ export type ProjectSourceBinding = GeneratedProjectDocument['$defs']['ProjectSou
 export type ProjectSinkBinding = GeneratedProjectDocument['$defs']['ProjectSinkBinding'];
 export type ConnectorCapability = components['schemas']['ConnectorCapabilityResponse'];
 export type JobResponse = components['schemas']['JobResponse'];
+export type RunResponse = components['schemas']['RunResponse'];
 export type ValidationIssue = components['schemas']['ValidationIssue'];
 export type ValidationReport = components['schemas']['ValidationReport'];
 export type CapabilitiesResponse = components['schemas']['CapabilitiesResponse'];
@@ -96,7 +97,7 @@ export const blankProject = (): ProjectCreateRequest => ({
     },
   },
   graph: {
-    name: 'Main pipeline',
+    name: 'main-pipeline',
     nodes: [
       {
         id: 'calculate',

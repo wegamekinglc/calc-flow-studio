@@ -3,9 +3,8 @@
 The studio is the local React/TypeScript client for Calc Flow's FastAPI service.
 It uses React Flow 12 and types generated from `openapi.json`.
 
-See the repository [design
-guide](https://github.com/wegamekinglc/calc-flow/blob/main/docs/design.md) for
-Studio's ownership boundary and the [continuous streaming
+See the local [Studio guide](../docs/studio-guide.md) for editing and execution,
+and the core's [continuous streaming
 guide](https://github.com/wegamekinglc/calc-flow/blob/main/docs/streaming-guide.md)
 for the job lifecycle exposed by `/api/v3`.
 
@@ -34,6 +33,18 @@ for your platform:
 .\web-ui\scripts\stop_web_ui.ps1
 ```
 
+In **Batch** mode, **Run batch** saves the confirmed input data, executes the
+calculation in a bounded worker, and displays the output rows in **Results
+preview**. The default `total = a + b` example returns totals `3` and `7`.
+An active calculation exposes **Cancel batch**; failures and timeouts appear in
+the results panel. In **Stream** mode, **Start job** uses the configured
+connector sources and sinks and exposes the continuous job controls.
+Stream graph names use letters, numbers, dots, underscores, or dashes so they
+can identify checkpoint state. **Graph name** in the stream settings edits this
+value. File sources require an existing input file or directory on the server;
+set their **Options** `path` and `format` before starting. Start-time validation
+reports invalid graph names and missing local inputs before creating a worker.
+
 Vite binds to `127.0.0.1` and proxies `/api` to
 `http://127.0.0.1:8765`. The start script runs `npm ci` automatically when
 `node_modules` is missing and waits until both services are reachable.
@@ -49,6 +60,12 @@ watermark, delivery, and managed-state settings without placing credentials in
 the document. The Job observatory starts persistent stream jobs, resumes SSE
 status after disconnects, displays bounded metrics and results, and exposes
 checkpoint, graceful shutdown, and cancellation controls.
+
+Stream-mode projects can add **Snapshot SQL** nodes to query the latest complete
+relations. The inspector edits their SQL, input aliases, schemas, and registered
+UDFs. Each incoming batch replaces one whole relation; connect the output directly
+to a sink. Imported project-v3 documents also retain the core's cumulative
+sum/min/max/variance primitives and their state-layout version.
 
 ## Edit data sources
 
@@ -113,5 +130,5 @@ npx playwright install chromium
 npm run test:e2e
 npm audit --omit=dev
 cd backend
-uv run --project . --extra dev pytest --cov=calc_flow_studio
+uv run --no-sync --project . pytest --cov=calc_flow_studio
 ```

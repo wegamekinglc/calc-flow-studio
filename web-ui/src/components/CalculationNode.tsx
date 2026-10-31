@@ -15,6 +15,7 @@ const nodeKindLabel = (kind: FlowNodeData['kind']): string => {
   switch (kind) {
     case 'expression': return 'ƒx';
     case 'sql': return 'SQL';
+    case 'snapshot_sql': return 'SNAP SQL';
     case 'rolling': return 'ROLL';
     case 'cross_section': return 'CS';
     case 'stream_join': return 'JOIN';

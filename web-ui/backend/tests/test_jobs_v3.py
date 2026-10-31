@@ -7,6 +7,7 @@ from os import DirEntry
 from pathlib import Path
 from types import SimpleNamespace
 
+import pyarrow.parquet as pq
 import pytest
 from calc_flow import ProjectDocument
 from studio_client import TestClient
@@ -177,6 +178,7 @@ def test_continuous_progress_formats_the_native_aggregate_watermark() -> None:
 
 @pytest.fixture()
 def controlled_manager(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> RunManager:
+    (tmp_path / "input.json").write_text('{"value": 1}\n')
     monkeypatch.setattr(
         run_manager_module, "_execute_continuous_worker", _controlled_worker
     )
@@ -213,6 +215,81 @@ def test_job_event_route_rejects_encoded_slash_id(tmp_path: Path) -> None:
         events = client.get("/api/v3/jobs/team%2Falpha/events")
 
     assert events.status_code == 404
+
+
+def test_start_job_reports_default_graph_and_missing_input_before_worker_spawn(
+    tmp_path: Path,
+) -> None:
+    project = _stream_project(tmp_path)
+    project["graph"]["name"] = "Main pipeline"
+    manager = RunManager(
+        use_processes=False, checkpoint_directory=tmp_path / "checkpoints"
+    )
+    app = create_app(project_directory=tmp_path / "projects", run_manager=manager)
+    with TestClient(app) as client:
+        assert client.post("/api/v3/projects", json=project).status_code == 201
+        started = client.post("/api/v3/jobs", json={"project_id": "stream_project"})
+        assert started.status_code == 422, started.text
+        issues = started.json()["detail"]["issues"]
+        assert {issue["path"] for issue in issues} == {
+            "graph.name",
+            "sources[0].options.path",
+        }
+        assert manager.list_jobs() == ()
+
+
+def test_snapshot_sql_project_round_trip_and_native_job(tmp_path: Path) -> None:
+    project = _stream_project(tmp_path, project_id="snapshot_project")
+    project["graph"]["nodes"] = [
+        {
+            "id": "snapshot",
+            "operator": {
+                "kind": "snapshot_sql",
+                "query": "SELECT SUM(value) AS result FROM input",
+                "aliases": ["input"],
+            },
+            "input_ports": [
+                {
+                    "name": "input",
+                    "kind": "table",
+                    "required": True,
+                    "schema": [
+                        {"name": "value", "data_type": "int64", "nullable": True}
+                    ],
+                }
+            ],
+            "output_ports": [
+                {
+                    "name": "output",
+                    "kind": "table",
+                    "required": True,
+                    "schema": [
+                        {"name": "result", "data_type": "int64", "nullable": True}
+                    ],
+                }
+            ],
+        }
+    ]
+    (tmp_path / "input.json").write_text('{"value": 2}\n{"value": 3}\n')
+    manager = RunManager(
+        use_processes=False, checkpoint_directory=tmp_path / "checkpoints"
+    )
+    app = create_app(project_directory=tmp_path / "projects", run_manager=manager)
+    with TestClient(app) as client:
+        created = client.post("/api/v3/projects", json=project)
+        assert created.status_code == 201, created.text
+        exported = client.get("/api/v3/projects/snapshot_project/export?format=json")
+        assert exported.json()["graph"]["nodes"][0]["operator"] == {
+            **project["graph"]["nodes"][0]["operator"],
+            "udfs": [],
+        }
+        started = client.post("/api/v3/jobs", json={"project_id": "snapshot_project"})
+        assert started.status_code == 202, started.text
+        _wait_for_status(manager, started.json()["id"], RunStatus.COMPLETED)
+
+    files = list(tmp_path.rglob("*.parquet"))
+    assert len(files) == 1
+    assert pq.read_table(files[0])["result"].to_pylist() == [5]
 
 
 def test_resource_limits_use_exact_byte_contract(tmp_path: Path) -> None:

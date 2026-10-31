@@ -34,6 +34,7 @@ import { inspectLoweredNode } from './components/projectInspectionModel';
 import { PanelResizeHandle } from './components/PanelResizeHandle';
 import { ProjectActions } from './components/ProjectActions';
 import { ResultsPanel } from './components/ResultsPanel';
+import { BatchResultsPanel } from './components/BatchResultsPanel';
 import { StreamConfigEditor } from './components/StreamConfigEditor';
 import {
   createDataSourceDrafts,
@@ -55,6 +56,7 @@ import {
 } from './components/panelLayout';
 import { useBusyAction } from './hooks/useBusyAction';
 import { useJobEvents } from './hooks/useJobEvents';
+import { useBatchPreview } from './hooks/useBatchPreview';
 import {
   blankProject,
   type CatalogResponse,
@@ -65,6 +67,7 @@ import {
   type NodeConfig,
   type ProjectDocument,
   type ProjectSummary,
+  type RunResponse,
   type ValidationReport,
 } from './types';
 
@@ -94,7 +97,7 @@ export const ARROW_TYPES = [
 ] as const;
 type EditableNodeKind = Extract<
   NodeConfig['operator']['kind'],
-  'expression' | 'sql' | 'stream_join'
+  'expression' | 'sql' | 'snapshot_sql' | 'stream_join'
 >;
 type ProjectUpdate = EditableProject | ((current: EditableProject) => EditableProject);
 type SourceDraftUpdate =
@@ -102,7 +105,7 @@ type SourceDraftUpdate =
   | ((current: DataSourceDraft[]) => DataSourceDraft[]);
 
 const nodeColor = (node: FlowNode) => {
-  if (node.data.kind === 'sql') return '#ef9456';
+  if (node.data.kind === 'sql' || node.data.kind === 'snapshot_sql') return '#ef9456';
   if (node.data.kind === 'stream_join') return '#56a8d5';
   if (node.data.kind === 'external') return '#a994ff';
   return '#56d5b2';
@@ -130,11 +133,11 @@ const makeNode = (
     output_ports: [],
     position: { x: 120 + nodes.length * 32, y: 100 + nodes.length * 36 },
   };
-  if (kind === 'sql') {
+  if (kind === 'sql' || kind === 'snapshot_sql') {
     return {
       ...shared,
       operator: {
-        kind: 'sql',
+        kind,
         query: 'SELECT * FROM input',
         aliases: ['input'],
         udfs: [],
@@ -237,6 +240,7 @@ export default function App() {
   const [selectedNodeId, setSelectedNodeId] = useState<string>('calculate');
   const [validation, setValidation] = useState<ValidationReport | null>(null);
   const [job, setJob] = useState<JobResponse | null>(null);
+  const [preview, setPreview] = useState<RunResponse | null>(null);
   const [progress, setProgress] = useState<JobEvent | null>(null);
   const [message, setMessage] = useState('');
   const { busy, run } = useBusyAction(setMessage);
@@ -275,6 +279,7 @@ export default function App() {
       setSelectedNodeId(next.graph.nodes[0]?.id ?? '');
       setValidation(null);
       setJob(null);
+      setPreview(null);
       setProgress(null);
     },
     [],
@@ -337,6 +342,18 @@ export default function App() {
     ? job.id
     : null;
   useJobEvents(observedJobId, handleJobUpdate, handleJobEvent, handleJobError);
+
+  const observedPreviewId = preview?.status === 'pending' || preview?.status === 'running'
+    ? preview.id : null;
+  const handlePreviewUpdate = useCallback((next: RunResponse) => {
+    setPreview((current) => current?.id === next.id
+      && (current.status === 'pending' || current.status === 'running') ? next : current);
+  }, []);
+  const handlePreviewError = useCallback((error: Error) => {
+    setPreview(null);
+    setMessage(error.message);
+  }, []);
+  useBatchPreview(observedPreviewId, handlePreviewUpdate, handlePreviewError);
 
   const flowNodes = useMemo<FlowNode[]>(
     () =>
@@ -468,6 +485,18 @@ export default function App() {
     const report = await api.validateProject(saved.id);
     setValidation(report);
     setMessage(report.valid ? 'Graph compiled successfully' : 'Validation failed');
+  });
+
+  const runBatch = () => run(async () => {
+    const prepared = prepareProject();
+    if (prepared?.runtime.mode !== 'batch') return;
+    const saved = await persistProject(prepared);
+    setPreview(await api.startPreview(saved.id));
+    setMessage('Batch calculation started');
+  });
+
+  const cancelBatch = () => run(async () => {
+    if (preview) setPreview(await api.cancelPreview(preview.id));
   });
 
   const startJob = () => {
@@ -816,7 +845,11 @@ export default function App() {
           />
           <button className="ghost-button topbar-control" type="button" disabled={persistenceBusy} onClick={() => void save()}>Save</button>
           <button className="ghost-button topbar-control" type="button" disabled={persistenceBusy} onClick={() => void validate()}>Validate</button>
-          <button className="run-button topbar-control" type="button" disabled={persistenceBusy || project.runtime.mode !== 'stream' || activeJob} onClick={() => void startJob()}><span>▶</span> Start job</button>
+          {project.runtime.mode === 'batch' ? (
+            <button className="run-button topbar-control" type="button" disabled={persistenceBusy || observedPreviewId !== null} onClick={() => void runBatch()}>Run batch</button>
+          ) : (
+            <button className="run-button topbar-control" type="button" disabled={persistenceBusy || activeJob} onClick={() => void startJob()}><span>▶</span> Start job</button>
+          )}
         </div>
       </header>
 
@@ -830,7 +863,10 @@ export default function App() {
           <button className="node-tool expression" type="button" onClick={() => addNode('expression')}><span>ƒx</span><div><strong>Expression</strong><small>Project · filter · calculate</small></div></button>
           <button className="node-tool sql" type="button" onClick={() => addNode('sql')}><span>SQL</span><div><strong>DataFusion SQL</strong><small>Join · aggregate · window</small></div></button>
           {project.runtime.mode === 'stream' && (
-            <button className="node-tool stream_join" type="button" onClick={() => { addNode('stream_join'); }}><span>⋈</span><div><strong>Stream Join</strong><small>Bounded · event time · inner</small></div></button>
+            <>
+              <button className="node-tool sql" type="button" onClick={() => addNode('snapshot_sql')}><span>SQL</span><div><strong>Snapshot SQL</strong><small>Query latest complete relations</small></div></button>
+              <button className="node-tool stream_join" type="button" onClick={() => { addNode('stream_join'); }}><span>⋈</span><div><strong>Stream Join</strong><small>Bounded · event time · inner</small></div></button>
+            </>
           )}
 
           <StreamConfigEditor
@@ -916,7 +952,9 @@ export default function App() {
         )}
       </section>
 
-      <ResultsPanel
+      {project.runtime.mode === 'batch' ? (
+        <BatchResultsPanel preview={preview} validation={validation} busy={busy} onCancel={() => void cancelBatch()} />
+      ) : <ResultsPanel
         validation={validation}
         job={job}
         progress={progress}
@@ -924,7 +962,7 @@ export default function App() {
         onCheckpoint={() => void checkpointJob()}
         onShutdown={() => void shutdownJob()}
         onCancel={() => void cancelJob()}
-      />
+      />}
       <BenchmarkComparison />
     </main>
   );

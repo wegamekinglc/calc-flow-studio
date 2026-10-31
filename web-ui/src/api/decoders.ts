@@ -2,6 +2,7 @@ import type { components } from './schema';
 
 type CapabilitiesResponse = components['schemas']['CapabilitiesResponse'];
 type JobResponse = components['schemas']['JobResponse'];
+type RunResponse = components['schemas']['RunResponse'];
 type ValidationReport = components['schemas']['ValidationReport'];
 
 export class ApiContractError extends Error {
@@ -558,6 +559,83 @@ export const decodeValidationReport = (value: unknown): ValidationReport => {
 
 const nullableStringAt = (value: unknown, path: string): void => {
   if (value !== null) stringAt(value, path);
+};
+
+const outputPreviewAt = (value: unknown, path: string): void => {
+  const output = objectAt(value, path);
+  const kind = literalAt(output.kind, ['table', 'array'], `${path}.kind`);
+  exactKeys(output, kind === 'table'
+    ? ['kind', 'total_rows', 'truncated', 'metadata', 'schema', 'rows']
+    : ['kind', 'total_rows', 'truncated', 'metadata', 'backend', 'data'], path);
+  integerAt(output.total_rows, `${path}.total_rows`);
+  booleanAt(output.truncated, `${path}.truncated`);
+  jsonAt(objectAt(output.metadata, `${path}.metadata`), `${path}.metadata`);
+  if (kind === 'array') {
+    stringAt(output.backend, `${path}.backend`);
+    jsonAt(output.data, `${path}.data`);
+    return;
+  }
+  arrayAt(output.schema, `${path}.schema`).forEach((value, index) => {
+    const field = objectAt(value, `${path}.schema[${index}]`);
+    exactKeys(field, ['name', 'type', 'nullable'], `${path}.schema[${index}]`);
+    stringAt(field.name, `${path}.schema[${index}].name`);
+    stringAt(field.type, `${path}.schema[${index}].type`);
+    booleanAt(field.nullable, `${path}.schema[${index}].nullable`);
+  });
+  arrayAt(output.rows, `${path}.rows`).forEach((row, index) => {
+    jsonAt(objectAt(row, `${path}.rows[${index}]`), `${path}.rows[${index}]`);
+  });
+};
+
+const previewResultAt = (value: unknown): void => {
+  const result = objectAt(value, 'preview.result');
+  exactKeys(result, ['outputs', 'node_timings', 'datafusion_metrics', 'metadata'], 'preview.result');
+  const outputs = objectAt(result.outputs, 'preview.result.outputs');
+  Object.entries(outputs).forEach(([name, output]) => {
+    outputPreviewAt(output, `preview.result.outputs.${name}`);
+  });
+  objectAt(result.node_timings, 'preview.result.node_timings');
+  arrayAt(result.datafusion_metrics, 'preview.result.datafusion_metrics');
+  jsonAt(objectAt(result.metadata, 'preview.result.metadata'), 'preview.result.metadata');
+};
+
+const activePreviewAt = (preview: Record<string, unknown>, status: string): void => {
+  if (preview.finished_at !== null || preview.error !== null || preview.result !== null) {
+    fail('preview', 'active preview payload is inconsistent');
+  }
+  if (status === 'pending') {
+    if (preview.started_at !== null) fail('preview.started_at', 'pending previews cannot have a start time');
+  } else stringAt(preview.started_at, 'preview.started_at');
+};
+
+const terminalPreviewAt = (preview: Record<string, unknown>, status: string): void => {
+  stringAt(preview.finished_at, 'preview.finished_at');
+  if (status !== 'cancelled') stringAt(preview.started_at, 'preview.started_at');
+  if (status === 'failed' || status === 'timed_out') {
+    if (!stringAt(preview.error, 'preview.error')) fail('preview.error', 'must not be empty');
+  } else if (preview.error !== null) fail('preview.error', 'expected null');
+  if (status === 'completed') previewResultAt(preview.result);
+  else if (preview.result !== null) fail('preview.result', 'expected null');
+};
+
+export const decodeRunResponse = (value: unknown): RunResponse => {
+  const preview = objectAt(value, 'preview');
+  exactKeys(preview, [
+    'id', 'project_id', 'status', 'created_at', 'started_at', 'finished_at', 'error', 'result',
+  ], 'preview');
+  stringAt(preview.id, 'preview.id');
+  stringAt(preview.project_id, 'preview.project_id');
+  stringAt(preview.created_at, 'preview.created_at');
+  const status = literalAt(preview.status, [
+    'pending', 'running', 'completed', 'failed', 'cancelled', 'timed_out',
+  ], 'preview.status');
+  nullableStringAt(preview.started_at, 'preview.started_at');
+  nullableStringAt(preview.finished_at, 'preview.finished_at');
+  nullableStringAt(preview.error, 'preview.error');
+  if (status === 'pending' || status === 'running') {
+    activePreviewAt(preview, status);
+  } else terminalPreviewAt(preview, status);
+  return value as RunResponse;
 };
 
 export const decodeJobResponse = (value: unknown): JobResponse => {

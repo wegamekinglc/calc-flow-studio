@@ -217,8 +217,8 @@ const toolbarControls = (page: Page): MeasuredControl[] => [
     locator: page.getByRole('button', { name: 'Validate', exact: true }),
   },
   {
-    label: 'Start job',
-    locator: page.getByRole('button', { name: /Start job/ }),
+    label: 'Run batch',
+    locator: page.getByRole('button', { name: 'Run batch', exact: true }),
   },
 ];
 
@@ -423,6 +423,40 @@ test.describe('Data Source dialog and toolbar layout', () => {
   }
 });
 
+test('runs the default batch example and shows its calculated rows', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New', exact: true }).click();
+  const run = page.getByRole('button', { name: 'Run batch', exact: true });
+  await expect(run).toBeEnabled();
+  await run.click();
+  const output = page.getByRole('region', { name: 'Batch output output' });
+  await expect(output).toBeVisible({ timeout: 15_000 });
+  await expect(output.locator('tbody tr').nth(0).locator('td').last()).toHaveText('3');
+  await expect(output.locator('tbody tr').nth(1).locator('td').last()).toHaveText('7');
+  await expect(run).toBeEnabled();
+  const projectId = await page.getByLabel('Project', { exact: true }).inputValue();
+  await deleteWithLaunchToken(page.request, `${projectsUrl}/${projectId}`);
+});
+
+test('switches the default batch example to a working file stream', async ({ page }) => {
+  const directory = resolve('test-results', 'default-stream-switch');
+  const inputPath = resolve(directory, 'input.json');
+  const outputPath = resolve(directory, 'output');
+  await mkdir(directory, { recursive: true });
+  await writeFile(inputPath, '{"a":1,"b":2}\n{"a":3,"b":4}\n');
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New', exact: true }).click();
+  await page.getByRole('button', { name: 'Stream', exact: true }).click();
+  await expect(page.getByLabel('Graph name', { exact: true })).toHaveValue('main-pipeline');
+  await page.getByRole('textbox', { name: 'Options', exact: true }).nth(0).fill(JSON.stringify({ path: inputPath, format: 'json' }));
+  await page.getByRole('textbox', { name: 'Options', exact: true }).nth(1).fill(JSON.stringify({ path: outputPath, output: 'results' }));
+  await page.getByRole('button', { name: /Start job/ }).click();
+  await expect(page.locator('.status-pill.completed')).toBeVisible({ timeout: 15_000 });
+  await expect.poll(async () => (await readdir(outputPath, { recursive: true })).filter((path) => path.endsWith('.parquet')).length).toBeGreaterThan(0);
+  const projectId = await page.getByLabel('Project', { exact: true }).inputValue();
+  await deleteWithLaunchToken(page.request, `${projectsUrl}/${projectId}`);
+});
+
 test('persists and validates a DataFusion UDF graph without browser code', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Build the flow')).toBeVisible();
@@ -438,7 +472,8 @@ test('persists and validates a DataFusion UDF graph without browser code', async
   const projects = await page.request.get('http://127.0.0.1:8765/api/v3/projects');
   expect(projects.ok()).toBeTruthy();
   const summaries: { id: string }[] = await projects.json();
-  const summary = summaries.find(({ id }) => /^project_[0-9a-f]{32}$/.test(id));
+  const selectedId = await page.getByLabel('Project', { exact: true }).inputValue();
+  const summary = summaries.find(({ id }) => id === selectedId);
   expect(summary).toBeDefined();
   if (summary === undefined) {
     throw new Error('created project summary is missing');
