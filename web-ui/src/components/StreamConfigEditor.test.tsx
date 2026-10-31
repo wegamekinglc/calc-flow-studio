@@ -28,9 +28,11 @@ const connectors: ConnectorCapability[] = [
 describe('StreamConfigEditor', () => {
   it('switches atomically from batch inputs to connector bindings', () => {
     const onChange = vi.fn();
+    const project = blankProject();
+    const legacy = { ...project, graph: { ...project.graph, name: 'Main pipeline' } };
     render(
       <StreamConfigEditor
-        project={blankProject()}
+        project={legacy}
         connectors={connectors}
         onChange={onChange}
       />,
@@ -40,6 +42,7 @@ describe('StreamConfigEditor', () => {
 
     expect(onChange).toHaveBeenCalledOnce();
     expect(at(onChange.mock.calls)[0]).toMatchObject({
+      graph: { name: 'main-pipeline' },
       runtime: {
         mode: 'stream',
         options: { checkpoint_interval_ms: 30_000 },
@@ -55,6 +58,7 @@ describe('StreamConfigEditor', () => {
         delivery: 'at_least_once',
       }],
     });
+    expect(legacy.graph.name).toBe('Main pipeline');
   });
 
   it('edits stream limits and rejects malformed option JSON locally', () => {

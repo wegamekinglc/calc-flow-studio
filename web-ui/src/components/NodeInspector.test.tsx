@@ -132,25 +132,26 @@ describe('NodeInspector', () => {
     expect(screen.queryByText('out · output')).not.toBeInTheDocument();
   });
 
-  it('emits semantic edits for independent SQL alias rows', () => {
+  it.each(['sql', 'snapshot_sql'] as const)('edits %s queries and independent alias rows', (kind) => {
     const base = at(blankProject().graph.nodes);
     const node = {
       ...base,
       operator: {
-        kind: 'sql' as const,
+        kind,
         query: 'SELECT * FROM left JOIN right USING (id)',
         aliases: ['left', 'right'],
         udfs: [],
       },
     };
     const onSqlAliasEdit = vi.fn();
+    const onChange = vi.fn();
 
     render(
       <NodeInspector
         node={node}
         arrowTypes={['int64']}
         udfs={[]}
-        onChange={vi.fn()}
+        onChange={onChange}
         onSqlAliasEdit={onSqlAliasEdit}
         onDelete={vi.fn()}
       />,
@@ -158,6 +159,14 @@ describe('NodeInspector', () => {
 
     expect(screen.getByLabelText('Input alias 1')).toHaveValue('left');
     expect(screen.getByLabelText('Input alias 2')).toHaveValue('right');
+
+    fireEvent.change(screen.getByLabelText('DataFusion SQL'), {
+      target: { value: 'SELECT id FROM left' },
+    });
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...node,
+      operator: { ...node.operator, query: 'SELECT id FROM left' },
+    });
 
     fireEvent.click(screen.getByRole('button', { name: 'Add input alias' }));
     expect(onSqlAliasEdit).toHaveBeenLastCalledWith({ type: 'add' });

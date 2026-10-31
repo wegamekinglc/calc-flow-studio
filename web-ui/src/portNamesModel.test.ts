@@ -45,13 +45,13 @@ const expressionNode = (): NodeConfig => ({
   },
 });
 
-const sqlNode = (): NodeConfig => ({
+const sqlNode = (kind: 'sql' | 'snapshot_sql' = 'sql'): NodeConfig => ({
   id: 'sql',
   input_ports: [],
   output_ports: [],
   position: { x: 0, y: 0 },
   operator: {
-    kind: 'sql',
+    kind,
     query: 'SELECT * FROM input',
     aliases: ['staging', 'budget'],
     udfs: [],
@@ -82,8 +82,8 @@ describe('derivedInputNames', () => {
     expect(derivedInputNames(declared)).toEqual(['events']);
   });
 
-  it('falls back to sql aliases for sql nodes without declared ports', () => {
-    expect(derivedInputNames(sqlNode())).toEqual(['staging', 'budget']);
+  it.each(['sql', 'snapshot_sql'] as const)('derives %s ports from aliases', (kind) => {
+    expect(derivedInputNames(sqlNode(kind))).toEqual(['staging', 'budget']);
   });
 
   it('falls back to a single input port for expression nodes', () => {

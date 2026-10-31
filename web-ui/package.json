@@ -3,6 +3,9 @@
   "private": true,
   "version": "2026.10.12",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
@@ -11,7 +14,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "generate:api": "node scripts/generate_api.mjs",
-    "sync:api": "UV_CACHE_DIR=/tmp/calc-flow-web-uv-cache uv run --project backend python scripts/export_openapi.py && npm run generate:api",
+    "sync:api": "UV_CACHE_DIR=/tmp/calc-flow-web-uv-cache uv run --no-sync --project backend python scripts/export_openapi.py && npm run generate:api",
     "benchmark": "vitest bench --run"
   },
   "dependencies": {

@@ -412,6 +412,7 @@ def test_capabilities_route_exposes_the_typed_runtime_session_snapshot(
         "cross_section",
         "expression",
         "rolling",
+        "snapshot_sql",
         "sql",
         "stream_asof_join",
         "stream_join",

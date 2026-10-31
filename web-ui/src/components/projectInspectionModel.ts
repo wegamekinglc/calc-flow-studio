@@ -124,7 +124,7 @@ const expressionSources = (
 const directSourceExpressions = (node: NodeConfig): string[] | null => {
   const operator = node.operator;
   if (operator.kind === 'expression') return expressionSources(operator);
-  if (operator.kind === 'sql') return [operator.query];
+  if (operator.kind === 'sql' || operator.kind === 'snapshot_sql') return [operator.query];
   if (operator.kind !== 'external') return null;
   return operator.options.expression === undefined
     ? []
@@ -234,6 +234,7 @@ const stateFact = (node: NodeConfig): string => {
     return `bounded · rows≤${rows} total · bytes≤${bytes} total`;
   }
   if (operator.kind === 'window') return 'bounded by declared window';
+  if (operator.kind === 'snapshot_sql') return 'latest complete relations · checkpointed replacement state';
   if (operator.kind === 'external') return 'unknown · provider lifecycle not encoded';
   return 'stateless';
 };

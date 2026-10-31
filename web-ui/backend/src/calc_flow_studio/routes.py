@@ -31,10 +31,13 @@ from calc_flow_studio.models import (
     CapabilitiesResponse,
     JobCreateRequest,
     JobResponse,
+    PreviewCreateRequest,
     ProjectCreateRequest,
     ProjectSummary,
     ResourceLimits,
     RunEvent,
+    RunRequest,
+    RunResponse,
     RunStatus,
     ValidationReport,
 )
@@ -42,6 +45,7 @@ from calc_flow_studio.run_manager import (
     CapabilitySnapshotError,
     RunManagerError,
 )
+from calc_flow_studio.stream_validation import stream_start_issues
 from calc_flow_studio.web_errors import (
     PROJECT_INVALID_422,
     bounded_request_body,
@@ -90,6 +94,12 @@ class RuntimeProtocol(Protocol):
 
 class RunManagerProtocol(Protocol):
     def capabilities(self) -> CapabilitiesResponse: ...
+
+    def submit(self, project: ProjectDocument, request: RunRequest) -> RunResponse: ...
+
+    def get(self, run_id: str) -> RunResponse: ...
+
+    def cancel(self, run_id: str) -> RunResponse: ...
 
     def submit_job(self, project: ProjectDocument) -> JobResponse: ...
 
@@ -360,6 +370,57 @@ def register_project_routes(
         return await _runtime_validation_report(project, runtime)
 
 
+def register_preview_routes(
+    app: FastAPI,
+    projects: ProjectStoreProtocol,
+    run_manager: RunManagerProtocol,
+    runtime: RuntimeProtocol,
+) -> None:
+    """Run saved batch inputs through the bounded preview worker lifecycle."""
+
+    @app.post(
+        f"{API_PREFIX}/previews",
+        response_model=RunResponse,
+        status_code=status.HTTP_202_ACCEPTED,
+        responses=PROJECT_INVALID_422,
+    )
+    async def create_preview(request: PreviewCreateRequest) -> RunResponse:
+        try:
+            project = await projects.get(request.project_id)
+        except (CalcFlowError, KeyError) as error:
+            raise native_error(error, operation="get") from error
+        if project.root["runtime"]["mode"] != "batch":
+            raise http_error(
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
+                "batch previews require runtime.mode 'batch'",
+            )
+        _require_valid(await _runtime_validation_report(project, runtime))
+        try:
+            return await run_in_threadpool(run_manager.submit, project, RunRequest())
+        except (CalcFlowError, RuntimeError, ValueError) as error:
+            raise http_error(
+                status.HTTP_422_UNPROCESSABLE_CONTENT, str(error)
+            ) from error
+
+    async def stored_preview(preview_id: str) -> RunResponse:
+        try:
+            preview = await run_in_threadpool(run_manager.get, preview_id)
+        except KeyError as error:
+            raise http_error(status.HTTP_404_NOT_FOUND, str(error)) from error
+        if not isinstance(preview, RunResponse):
+            raise http_error(status.HTTP_404_NOT_FOUND, "batch preview not found")
+        return preview
+
+    @app.get(f"{API_PREFIX}/previews/{{preview_id}}", response_model=RunResponse)
+    async def get_preview(preview_id: str) -> RunResponse:
+        return await stored_preview(preview_id)
+
+    @app.delete(f"{API_PREFIX}/previews/{{preview_id}}", response_model=RunResponse)
+    async def cancel_preview(preview_id: str) -> RunResponse:
+        await stored_preview(preview_id)
+        return await run_in_threadpool(run_manager.cancel, preview_id)
+
+
 def register_job_routes(
     app: FastAPI,
     projects: ProjectStoreProtocol,
@@ -383,6 +444,12 @@ def register_job_routes(
     async def create_job(request: JobCreateRequest) -> JobResponse:
         project = await stored_project(request.project_id)
         _require_valid(await _runtime_validation_report(project, runtime))
+        issues = await run_in_threadpool(stream_start_issues, project.root)
+        if issues:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=invalid_report_detail(issues),
+            )
         try:
             return await run_in_threadpool(run_manager.submit_job, project)
         except KeyError as error:

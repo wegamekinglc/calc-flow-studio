@@ -4,6 +4,7 @@ import {
   ApiContractError,
   decodeCapabilitiesResponse,
   decodeJobResponse,
+  decodeRunResponse,
 } from './decoders';
 
 const connectorFixture = () => ({
@@ -107,6 +108,47 @@ const job = (status: string) => ({
   error_code: status === 'failed' ? 'worker_failed' : null,
   reason_code: null,
   error: status === 'failed' ? 'worker exited' : null,
+});
+
+const batchPreview = () => ({
+  id: 'preview-1', project_id: 'project-1', status: 'completed',
+  created_at: '2026-01-01T00:00:00Z', started_at: '2026-01-01T00:00:01Z',
+  finished_at: '2026-01-01T00:00:02Z', error: null,
+  result: {
+    outputs: { output: {
+      kind: 'table', total_rows: 1, truncated: false, metadata: {},
+      schema: [{ name: 'total', type: 'int64', nullable: true }], rows: [{ total: 3 }],
+    } },
+    node_timings: {}, datafusion_metrics: [], metadata: {},
+  },
+});
+
+describe('batch preview decoder', () => {
+  it('decodes calculated rows and rejects malformed row payloads', () => {
+    const preview = batchPreview();
+    expect(decodeRunResponse(preview)).toEqual(preview);
+    expect(() => decodeRunResponse({ ...preview, result: {
+      ...preview.result, outputs: { output: { ...preview.result.outputs.output, rows: [3] } },
+    } })).toThrow(ApiContractError);
+  });
+
+  it('rejects inconsistent completed and pending lifecycles', () => {
+    const preview = batchPreview();
+    expect(() => decodeRunResponse({ ...preview, error: 'failed' })).toThrow(ApiContractError);
+    expect(() => decodeRunResponse({ ...preview, started_at: null })).toThrow(ApiContractError);
+    expect(() => decodeRunResponse({
+      ...preview, status: 'pending', finished_at: null, result: null,
+    })).toThrow(ApiContractError);
+  });
+
+  it('rejects undeclared fields in bounded output previews', () => {
+    const preview = batchPreview();
+    expect(() => decodeRunResponse({ ...preview, result: {
+      ...preview.result, outputs: { output: {
+        ...preview.result.outputs.output, raw_payload: 'outside the preview contract',
+      } },
+    } })).toThrow(ApiContractError);
+  });
 });
 
 describe('capabilities decoder', () => {

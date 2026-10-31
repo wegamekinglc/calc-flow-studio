@@ -42,7 +42,7 @@ export const editSqlInputAliases = (
   edit: SqlInputAliasEdit,
 ): EditableProject => {
   const current = project.graph.nodes.find((node) => node.id === nodeId);
-  if (current?.operator.kind !== 'sql') return project;
+  if (current?.operator.kind !== 'sql' && current?.operator.kind !== 'snapshot_sql') return project;
 
   const aliases = current.operator.aliases;
   let nextAliases: string[];

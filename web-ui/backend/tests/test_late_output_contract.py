@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
-from calc_flow import ProjectDocument, Runtime
+from calc_flow import ProjectDocument, Runtime, __version__
 from studio_client import TestClient
 
 from calc_flow_studio.app import create_app
@@ -410,7 +410,7 @@ def test_old_runtime_cannot_claim_late_support_from_package_version(
     monkeypatch.setattr(Runtime, "validation_report", validation)
     with TestClient(create_app(runtime=runtime)) as client:
         response = client.get("/api/v3/capabilities")
-    assert response.json()["runtime"]["packageVersion"] == "2026.10.12"
+    assert response.json()["runtime"]["packageVersion"] == __version__
     assert response.json()["runtime"]["lateOutput"]["operators"] == []
     assert validation.call_count == 2
 

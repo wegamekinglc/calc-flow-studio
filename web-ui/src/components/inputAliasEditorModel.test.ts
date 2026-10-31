@@ -7,7 +7,7 @@ import {
   validateInputAlias,
 } from './inputAliasEditorModel';
 
-const sqlProject = () => {
+const sqlProject = (kind: 'sql' | 'snapshot_sql' = 'sql') => {
   const project = blankProject();
   return {
     ...project,
@@ -17,7 +17,7 @@ const sqlProject = () => {
         {
           id: 'join',
           operator: {
-            kind: 'sql' as const,
+            kind,
             query: 'SELECT * FROM left JOIN right USING (id)',
             aliases: ['left', 'right'],
             udfs: [],
@@ -67,8 +67,8 @@ describe('SQL input aliases', () => {
     expect(validateInputAlias(' lhs ', 'left', ['left', 'right'])).toBeNull();
   });
 
-  it('renames the operator alias, schema port, and matching incoming edge', () => {
-    const project = sqlProject();
+  it.each(['sql', 'snapshot_sql'] as const)('renames %s aliases, schema ports, and incoming edges', (kind) => {
+    const project = sqlProject(kind);
     const updated = editSqlInputAliases(project, 'join', {
       type: 'rename',
       alias: 'right',
@@ -76,6 +76,7 @@ describe('SQL input aliases', () => {
     });
 
     expect(at(updated.graph.nodes).operator).toMatchObject({
+      kind,
       aliases: ['left', 'rhs'],
     });
     expect(at(at(updated.graph.nodes).input_ports, 1)).toEqual({

@@ -5,12 +5,14 @@ import type {
   ProjectCreateRequest,
   ProjectDocument,
   ProjectSummary,
+  RunResponse,
   ValidationReport,
 } from '../types';
 import {
   ApiContractError,
   decodeCapabilitiesResponse,
   decodeJobResponse,
+  decodeRunResponse,
   decodeValidationReport,
 } from './decoders';
 
@@ -194,6 +196,17 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ project_id: projectId }),
     }),
+  startPreview: (projectId: string) =>
+    request<RunResponse>(`${API_PREFIX}/previews`, decodeRunResponse, {
+      method: 'POST',
+      body: JSON.stringify({ project_id: projectId }),
+    }),
+  preview: (id: string, signal?: AbortSignal) => request<RunResponse>(
+    `${API_PREFIX}/previews/${pathId(id)}`, decodeRunResponse, { signal },
+  ),
+  cancelPreview: (id: string) => request<RunResponse>(
+    `${API_PREFIX}/previews/${pathId(id)}`, decodeRunResponse, { method: 'DELETE' },
+  ),
   job: (id: string) => request<JobResponse>(
     `${API_PREFIX}/jobs/${pathId(id)}`,
     decodeJobResponse,

@@ -141,6 +141,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v3/previews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Preview */
+        post: operations["create_preview_api_v3_previews_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v3/previews/{preview_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preview */
+        get: operations["get_preview_api_v3_previews__preview_id__get"];
+        put?: never;
+        post?: never;
+        /** Cancel Preview */
+        delete: operations["cancel_preview_api_v3_previews__preview_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v3/projects": {
         parameters: {
             query?: never;
@@ -267,6 +302,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ArrayOutputPreview */
+        ArrayOutputPreview: {
+            /** Backend */
+            backend: string;
+            data: components["schemas"]["calc_flow_studio__models__JSONValue"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "array";
+            /** Metadata */
+            metadata: {
+                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+            };
+            /** Total Rows */
+            total_rows: number;
+            /** Truncated */
+            truncated: boolean;
+        };
         /** CancelledJobResponse */
         CancelledJobResponse: {
             /**
@@ -289,6 +343,34 @@ export interface components {
             project_id: string;
             /** Reason Code */
             reason_code?: null;
+            /** Started At */
+            started_at?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "cancelled";
+        };
+        /** CancelledRunResponse */
+        CancelledRunResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error?: null;
+            /**
+             * Finished At
+             * Format: date-time
+             */
+            finished_at: string;
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            /** Result */
+            result?: null;
             /** Started At */
             started_at?: string | null;
             /**
@@ -338,6 +420,36 @@ export interface components {
             project_id: string;
             /** Reason Code */
             reason_code?: null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "completed";
+        };
+        /** CompletedRunResponse */
+        CompletedRunResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error?: null;
+            /**
+             * Finished At
+             * Format: date-time
+             */
+            finished_at: string;
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            result: components["schemas"]["RunResultPreview"];
             /**
              * Started At
              * Format: date-time
@@ -401,6 +513,134 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** DataFusionMetricPreview */
+        DataFusionMetricPreview: {
+            /** Active Entities */
+            active_entities?: number | null;
+            /** Active Entities Source */
+            active_entities_source: string;
+            /** Audit Ns */
+            audit_ns: number;
+            /** Available Parallelism */
+            available_parallelism: number;
+            /** Batch Envelope Ns */
+            batch_envelope_ns: number;
+            /** Coalesce Operator Count */
+            coalesce_operator_count: number;
+            /** Collect Ns */
+            collect_ns: number;
+            /** Configured Batch Size */
+            configured_batch_size: number;
+            /** Configured Target Partitions */
+            configured_target_partitions: number;
+            /** Decision Active Entities */
+            decision_active_entities?: number | null;
+            /** Decision Active Entities Source */
+            decision_active_entities_source: string;
+            /** Decision Input Rows */
+            decision_input_rows: number;
+            /** Diagnostics Collected */
+            diagnostics_collected: boolean;
+            /** Effective Target Partitions */
+            effective_target_partitions: number;
+            /** Elapsed Compute Ns */
+            elapsed_compute_ns: number;
+            /** Execution Ns */
+            execution_ns: number;
+            /** Execution Remaining Ns */
+            execution_remaining_ns: number;
+            /** Execution To First Batch Ns */
+            execution_to_first_batch_ns: number;
+            /** Input Adapter Ns */
+            input_adapter_ns: number;
+            /** Input Rows */
+            input_rows: number;
+            /** Logical Plan */
+            logical_plan: string;
+            /** Logical Plan String Ns */
+            logical_plan_string_ns: number;
+            /** Logical Planning Ns */
+            logical_planning_ns: number;
+            /** Max Partitions */
+            max_partitions: number;
+            /** Metrics Traversal Ns */
+            metrics_traversal_ns: number;
+            /** Min Rows Per Partition */
+            min_rows_per_partition: number;
+            /** Node Id */
+            node_id: string | null;
+            /** Output Arrow Wrap Ns */
+            output_arrow_wrap_ns: number;
+            /** Output Partition Count */
+            output_partition_count: number;
+            /** Output Partition Rows */
+            output_partition_rows: number[];
+            /** Output Rows */
+            output_rows: number;
+            /** Parallelism Decision Reused */
+            parallelism_decision_reused: boolean;
+            /**
+             * Parallelism Mode
+             * @enum {string}
+             */
+            parallelism_mode: "fixed" | "auto";
+            /** Partition Limit Reason */
+            partition_limit_reason: string;
+            /** Physical Metric Count */
+            physical_metric_count: number;
+            /** Physical Plan */
+            physical_plan: string;
+            /** Physical Plan String Ns */
+            physical_plan_string_ns: number;
+            /** Physical Planning Count */
+            physical_planning_count: number;
+            /** Physical Planning Ns */
+            physical_planning_ns: number;
+            /** Planning Ns */
+            planning_ns: number;
+            /** Query Id */
+            query_id: number;
+            /** Repartition Operator Count */
+            repartition_operator_count: number;
+            /** Repartition Sort Compute Ns */
+            repartition_sort_compute_ns: number;
+            /** Requested Target Partitions */
+            requested_target_partitions: number;
+            /** Rolling Candidate Windows */
+            rolling_candidate_windows: number;
+            /** Rolling Fallback Reasons */
+            rolling_fallback_reasons: string[];
+            /** Rolling Rewrite Enabled */
+            rolling_rewrite_enabled: boolean;
+            /** Rolling Rewritten Windows */
+            rolling_rewritten_windows: number;
+            /** Run Result Ns */
+            run_result_ns: number;
+            /** Runtime Acquire Ns */
+            runtime_acquire_ns: number;
+            /** Session State Create Ns */
+            session_state_create_ns: number;
+            /** Small Rows Threshold */
+            small_rows_threshold: number;
+            /** Sort Operator Count */
+            sort_operator_count: number;
+            /** Spill Bytes */
+            spill_bytes: number;
+            /** Sql Parse Ns */
+            sql_parse_ns: number;
+            /** Stream Open Ns */
+            stream_open_ns: number;
+            /** Table Register Ns */
+            table_register_ns: number;
+            /** Window Compute Ns */
+            window_compute_ns: number;
+            /** Window Operator Count */
+            window_operator_count: number;
+            /** Window Partition Count */
+            window_partition_count: number;
+            /** Window Partition Rows */
+            window_partition_rows: number[];
+        };
         /** @enum {string} */
         ExecutionModeValue: "batch" | "stream";
         /** FailedJobResponse */
@@ -438,6 +678,37 @@ export interface components {
              */
             status: "failed";
         };
+        /** FailedRunResponse */
+        FailedRunResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error: string;
+            /**
+             * Finished At
+             * Format: date-time
+             */
+            finished_at: string;
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            /** Result */
+            result?: null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "failed";
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -463,9 +734,6 @@ export interface components {
         };
         "JSONValue-Input": boolean | number | string | components["schemas"]["JSONValue-Input"][] | {
             [key: string]: components["schemas"]["JSONValue-Input"];
-        } | null;
-        "JSONValue-Output": boolean | number | string | components["schemas"]["JSONValue-Output"][] | {
-            [key: string]: components["schemas"]["JSONValue-Output"];
         } | null;
         /** JobCreateRequest */
         JobCreateRequest: {
@@ -517,6 +785,19 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** NodeTimingPreview */
+        NodeTimingPreview: {
+            /** Duration Ns */
+            duration_ns: number;
+            /** Input Rows */
+            input_rows: {
+                [key: string]: number;
+            };
+            /** Output Rows */
+            output_rows: {
+                [key: string]: number;
+            };
+        };
         /** OperatorCapabilityResponse */
         OperatorCapabilityResponse: {
             checkpointSupport: components["schemas"]["CheckpointSupportValue"];
@@ -551,8 +832,18 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** OutputFieldPreview */
+        OutputFieldPreview: {
+            /** Name */
+            name: string;
+            /** Nullable */
+            nullable: boolean;
+            /** Type */
+            type: string;
+        };
         /** @enum {string} */
         OutputFinalityValue: "per_row_final" | "group_final_append_only" | "unproven";
+        OutputPreview: components["schemas"]["TableOutputPreview"] | components["schemas"]["ArrayOutputPreview"];
         /** PendingJobResponse */
         PendingJobResponse: {
             /**
@@ -580,6 +871,31 @@ export interface components {
              */
             status: "pending";
         };
+        /** PendingRunResponse */
+        PendingRunResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error?: null;
+            /** Finished At */
+            finished_at?: null;
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            /** Result */
+            result?: null;
+            /** Started At */
+            started_at?: null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "pending";
+        };
         /** PreviewCapabilitiesResponse */
         PreviewCapabilitiesResponse: {
             /** Inputbatchkinds */
@@ -591,6 +907,11 @@ export interface components {
             requestInputFormats: ("arrow_ipc" | "columns" | "records")[];
             /** Workerregistrations */
             workerRegistrations: components["schemas"]["WorkerRegistrationCapability"][];
+        };
+        /** PreviewCreateRequest */
+        PreviewCreateRequest: {
+            /** Project Id */
+            project_id: string;
         };
         /** PreviewLimit */
         PreviewLimit: {
@@ -1163,6 +1484,13 @@ export interface components {
                     /** @default [] */
                     udfs: components["schemas"]["ProjectCreateRequest"]["$defs"]["UdfReference"][];
                 } | {
+                    aliases: string[];
+                    /** @constant */
+                    kind: "snapshot_sql";
+                    query: string;
+                    /** @default [] */
+                    udfs: components["schemas"]["ProjectCreateRequest"]["$defs"]["UdfReference"][];
+                } | {
                     /** @constant */
                     kind: "union";
                 } | {
@@ -1507,6 +1835,79 @@ export interface components {
                     /**
                      * Format: uint64
                      * @description Minimum valid samples for a non-null result.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_sum";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_min";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_max";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /**
+                     * Format: uint8
+                     * @description Degrees-of-freedom adjustment; must be `0` or `1`.
+                     */
+                    ddof: number;
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_variance";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
                      */
                     min_periods: number;
                     /** @description Output column name. */
@@ -1873,7 +2274,8 @@ export interface components {
                      * Format: uint32
                      * @description Durable state-layout version. Existing primitives use
                      *     [`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires
-                     *     [`ROLLING_EWMA_STATE_LAYOUT_VERSION`].
+                     *     [`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance
+                     *     require [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].
                      */
                     state_layout_version: number;
                     /** @description Frozen null/NaN value policy. */
@@ -1994,7 +2396,13 @@ export interface components {
                 };
                 /** @description Supported Join semantics. */
                 StreamJoinType: "inner";
-                /** @description Continuous runtime limits carried by project v3. */
+                /**
+                 * @description Continuous runtime limits carried by project v3.
+                 *
+                 *     Omitted JSON fields retain the project-v3 defaults for stable document
+                 *     fingerprints. [`Self::default`] uses current runtime defaults, which
+                 *     serialize explicitly.
+                 */
                 StreamRunOptions: {
                     /**
                      * Format: uint64
@@ -2610,6 +3018,13 @@ export interface components {
                     /** @default [] */
                     udfs: components["schemas"]["ProjectDocument"]["$defs"]["UdfReference"][];
                 } | {
+                    aliases: string[];
+                    /** @constant */
+                    kind: "snapshot_sql";
+                    query: string;
+                    /** @default [] */
+                    udfs: components["schemas"]["ProjectDocument"]["$defs"]["UdfReference"][];
+                } | {
                     /** @constant */
                     kind: "union";
                 } | {
@@ -2954,6 +3369,79 @@ export interface components {
                     /**
                      * Format: uint64
                      * @description Minimum valid samples for a non-null result.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_sum";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_min";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_max";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
+                     */
+                    min_periods: number;
+                    /** @description Output column name. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /**
+                     * Format: uint8
+                     * @description Degrees-of-freedom adjustment; must be `0` or `1`.
+                     */
+                    ddof: number;
+                    /** @description Numeric input column name. */
+                    input: string;
+                    /** @constant */
+                    kind: "cumulative_variance";
+                    /**
+                     * Format: uint64
+                     * @description Positive minimum valid sample count.
                      */
                     min_periods: number;
                     /** @description Output column name. */
@@ -3320,7 +3808,8 @@ export interface components {
                      * Format: uint32
                      * @description Durable state-layout version. Existing primitives use
                      *     [`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires
-                     *     [`ROLLING_EWMA_STATE_LAYOUT_VERSION`].
+                     *     [`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance
+                     *     require [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].
                      */
                     state_layout_version: number;
                     /** @description Frozen null/NaN value policy. */
@@ -3441,7 +3930,13 @@ export interface components {
                 };
                 /** @description Supported Join semantics. */
                 StreamJoinType: "inner";
-                /** @description Continuous runtime limits carried by project v3. */
+                /**
+                 * @description Continuous runtime limits carried by project v3.
+                 *
+                 *     Omitted JSON fields retain the project-v3 defaults for stable document
+                 *     fingerprints. [`Self::default`] uses current runtime defaults, which
+                 *     serialize explicitly.
+                 */
                 StreamRunOptions: {
                     /**
                      * Format: uint64
@@ -3698,6 +4193,26 @@ export interface components {
             /** Watermark */
             watermark?: string | null;
         };
+        /** RunResponse */
+        RunResponse: components["schemas"]["RunResponseVariant"];
+        RunResponseVariant: components["schemas"]["PendingRunResponse"] | components["schemas"]["RunningRunResponse"] | components["schemas"]["CompletedRunResponse"] | components["schemas"]["FailedRunResponse"] | components["schemas"]["TimedOutRunResponse"] | components["schemas"]["CancelledRunResponse"];
+        /** RunResultPreview */
+        RunResultPreview: {
+            /** Datafusion Metrics */
+            datafusion_metrics: components["schemas"]["DataFusionMetricPreview"][];
+            /** Metadata */
+            metadata: {
+                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+            };
+            /** Node Timings */
+            node_timings: {
+                [key: string]: components["schemas"]["NodeTimingPreview"];
+            };
+            /** Outputs */
+            outputs: {
+                [key: string]: components["schemas"]["OutputPreview"];
+            };
+        };
         /** RunningJobResponse */
         RunningJobResponse: {
             /**
@@ -3717,6 +4232,34 @@ export interface components {
             project_id: string;
             /** Reason Code */
             reason_code?: null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "running";
+        };
+        /** RunningRunResponse */
+        RunningRunResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error?: null;
+            /** Finished At */
+            finished_at?: null;
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            /** Result */
+            result?: null;
             /**
              * Started At
              * Format: date-time
@@ -3851,6 +4394,59 @@ export interface components {
         };
         /** @enum {string} */
         StreamingFailureReasonCode: "join_state_limit_exceeded" | "join_match_limit_exceeded" | "join_counter_overflow" | "join_time_conversion_failed" | "asof_invalid_input" | "asof_duplicate_identity" | "asof_late_row" | "asof_state_limit_exceeded" | "asof_workspace_limit_exceeded" | "asof_output_limit_exceeded" | "asof_counter_overflow" | "asof_protocol_error";
+        /** TableOutputPreview */
+        TableOutputPreview: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            kind: "table";
+            /** Metadata */
+            metadata: {
+                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+            };
+            /** Rows */
+            rows: {
+                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+            }[];
+            /** Schema */
+            schema: components["schemas"]["OutputFieldPreview"][];
+            /** Total Rows */
+            total_rows: number;
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** TimedOutRunResponse */
+        TimedOutRunResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error */
+            error: string;
+            /**
+             * Finished At
+             * Format: date-time
+             */
+            finished_at: string;
+            /** Id */
+            id: string;
+            /** Project Id */
+            project_id: string;
+            /** Result */
+            result?: null;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "timed_out";
+        };
         /** UdfCapabilityResponse */
         UdfCapabilityResponse: {
             /** Inputtypes */
@@ -3941,6 +4537,12 @@ export interface components {
         };
         ValidationReport: components["schemas"]["ValidValidationReport"] | components["schemas"]["InvalidValidationReport"];
         WorkerRegistrationCapability: components["schemas"]["SerializedWorkerRegistration"] | components["schemas"]["LazyBuiltinWorkerRegistration"] | components["schemas"]["UnavailableWorkerRegistration"];
+        "calc_flow__config__JSONValue-Output": boolean | number | string | components["schemas"]["calc_flow__config__JSONValue-Output"][] | {
+            [key: string]: components["schemas"]["calc_flow__config__JSONValue-Output"];
+        } | null;
+        calc_flow_studio__models__JSONValue: boolean | number | string | components["schemas"]["calc_flow_studio__models__JSONValue"][] | {
+            [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+        } | null;
     };
     responses: never;
     parameters: never;
@@ -4189,6 +4791,101 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_preview_api_v3_previews_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviewCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Invalid project document or request */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProjectInvalidResponse"];
+                };
+            };
+        };
+    };
+    get_preview_api_v3_previews__preview_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                preview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_preview_api_v3_previews__preview_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                preview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunResponse"];
                 };
             };
             /** @description Validation Error */

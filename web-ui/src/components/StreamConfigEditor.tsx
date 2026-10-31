@@ -122,6 +122,8 @@ export function StreamConfigEditor({
       const sink = defaultSink(sinks[0]);
       onChange({
         ...project,
+        graph: project.graph.name === 'Main pipeline'
+          ? { ...project.graph, name: 'main-pipeline' } : project.graph,
         runtime: {
           mode: 'stream',
           options: {
@@ -194,6 +196,16 @@ export function StreamConfigEditor({
 
       {streamOptions && (
         <>
+          <label>
+            Graph name
+            <input value={project.graph.name} onChange={(event) => {
+              onChange({ ...project, graph: { ...project.graph, name: event.target.value } });
+            }} />
+            {!/^[A-Za-z0-9_.-]+$/.test(project.graph.name) && (
+              <small className="field-error">Use letters, numbers, dots, underscores or dashes for a stream graph name.</small>
+            )}
+          </label>
+          <p className="muted">File sources read existing files on the server. Set Source Options.path to your input file.</p>
           <label>
             Checkpoint interval (ms)
             <input
