@@ -16,7 +16,8 @@ editing, validating, previewing, and running Calc Flow projects locally.
 
 ## Requirements
 
-- Python 3.13 or newer, uv, Node.js 20 or newer, and npm.
+- Python 3.13 or newer and uv.
+- Node.js 20.19+ (20.x), 22.13+ (22.x), or 24+, with npm. CI uses 20.20.0.
 - `calc-flow-python>=2026.10.27,<2027`.
 
 Install the published core and the editable Studio package with:
