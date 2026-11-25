@@ -10,8 +10,8 @@ editing, validating, previewing, and running Calc Flow projects locally.
 - `web-ui/backend/` — the `calc-flow-studio` Python package (FastAPI backend).
 - `web-ui/src/` — the React/TypeScript client (Vite and React Flow 12).
 - `web-ui/scripts/` — managed start/stop helpers and API-contract tooling.
-- `schemas/` — the checked project-v3 JSON Schema, verified against the
-  installed `calc-flow-python` in the backend test suite.
+- `schemas/` — the checked project-v3 JSON Schema for the supported core
+  release floor.
 - `docs/` — Studio guides.
 
 ## Requirements
@@ -26,8 +26,11 @@ Install the published core and the editable Studio package with:
 uv sync --package calc-flow-studio --extra dev
 ```
 
-For the exact core revision validated in CI, build a wheel from the calc-flow
-commit pinned by `CALC_FLOW_CORE_REF` in `.github/workflows/ci.yml`:
+CI tests backend and browser startup with the published core wheels
+`2026.10.27` and `2026.11.14`. The full backend and browser suites use the
+release floor `2026.10.27`.
+
+To test a source build, run this command from the Calc Flow core checkout:
 
 ```bash
 uv build --wheel --config-setting 'build-args=--features pyo3/abi3-py313'
@@ -41,15 +44,14 @@ uv pip install --python .venv/bin/python --no-deps /path/to/calc_flow_python-*.w
 uv pip install --python .venv/bin/python --no-deps --editable web-ui/backend
 ```
 
-Use `uv run --no-sync` after installing a source-built core wheel so dependency
-resolution does not replace it with the published release. API generation and
-the managed start scripts preserve that installed core.
+Use `uv run --no-sync` after installing a source-built core wheel to preserve
+that installation. The managed start scripts also use the installed core.
 
 ## Run
 
 After upgrading an existing checkout, rerun `uv sync --package calc-flow-studio
---extra dev` to replace the older core dependency. For a source-built core,
-reinstall the pinned wheel afterward and preserve it with `uv run --no-sync`.
+--extra dev` to refresh the dependencies. For a source-built core, reinstall
+your wheel afterward and preserve it with `uv run --no-sync`.
 Reinstall frontend dependencies with `npm --prefix web-ui ci`, then stop and
 restart the managed services. Existing project documents remain project-v3.
 
@@ -111,9 +113,13 @@ cd backend
 uv run --no-sync --project . pytest --cov=calc_flow_studio
 ```
 
-The backend test suite enforces an 85% coverage floor, and the checked-in API
-contract (`web-ui/openapi.json`, `web-ui/src/api/schema.d.ts`) is regenerated
-with `npm run sync:api` and drift-checked in CI.
+The backend test suite enforces an 85% coverage floor. The running server's
+project schema and OpenAPI project components follow the installed core.
+`npm run sync:api` and `npm run build:wheel` generate the checked-in OpenAPI and
+TypeScript snapshots in an isolated Python 3.13 environment using the
+`2026.10.27` core wheel and [pinned API dependencies](web-ui/api-schema-constraints.txt).
+Use `npm ci` to install the generator from the npm lockfile. CI checks the
+snapshots against this toolchain.
 
 ## License
 

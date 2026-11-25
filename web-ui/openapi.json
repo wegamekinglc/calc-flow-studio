@@ -9,7 +9,7 @@
             "type": "string"
           },
           "data": {
-            "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+            "$ref": "#/components/schemas/JSONValue"
           },
           "kind": {
             "const": "array",
@@ -19,7 +19,7 @@
           },
           "metadata": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+              "$ref": "#/components/schemas/JSONValue"
             },
             "title": "Metadata",
             "type": "object"
@@ -1007,7 +1007,7 @@
         "title": "InvalidValidationReport",
         "type": "object"
       },
-      "JSONValue-Input": {
+      "JSONValue": {
         "anyOf": [
           {
             "type": "boolean"
@@ -1023,13 +1023,13 @@
           },
           {
             "items": {
-              "$ref": "#/components/schemas/JSONValue-Input"
+              "$ref": "#/components/schemas/JSONValue"
             },
             "type": "array"
           },
           {
             "additionalProperties": {
-              "$ref": "#/components/schemas/JSONValue-Input"
+              "$ref": "#/components/schemas/JSONValue"
             },
             "type": "object"
           },
@@ -1698,14 +1698,14 @@
             "properties": {
               "max_state_bytes": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_state_rows": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               }
             },
@@ -1771,7 +1771,7 @@
                   "width_micros": {
                     "description": "Positive bucket width in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -1805,7 +1805,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "null_placement": {
@@ -1819,7 +1819,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "tie_method": {
@@ -1858,7 +1858,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "null_placement": {
@@ -1872,7 +1872,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "tie_method": {
@@ -1907,7 +1907,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -1917,7 +1917,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -1945,7 +1945,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -1955,7 +1955,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -1987,7 +1987,7 @@
                   "min_samples": {
                     "description": "Minimum pairwise-valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -1997,7 +1997,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2018,8 +2018,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "input": {
@@ -2033,7 +2033,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2043,7 +2043,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2079,7 +2079,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2089,7 +2089,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "upper": {
@@ -2118,7 +2118,7 @@
                   "count": {
                     "description": "Positive number of ordered values to select.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "include_ties": {
@@ -2136,7 +2136,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null selection result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2146,7 +2146,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2168,7 +2168,7 @@
                   "count": {
                     "description": "Positive number of ordered values to select.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "include_ties": {
@@ -2186,7 +2186,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null selection result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2196,7 +2196,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2233,7 +2233,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2243,7 +2243,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2279,7 +2279,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2289,7 +2289,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2318,7 +2318,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples required before nulls are filled.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -2328,7 +2328,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2350,13 +2350,13 @@
               "allowed_lateness_micros": {
                 "description": "Allowed lateness in exact microseconds (SCE-00 D7).",
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "configuration_version": {
                 "description": "Semantic configuration version; must equal\n[`CROSS_SECTION_CONFIGURATION_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "entity_by": {
@@ -2403,7 +2403,7 @@
               "state_layout_version": {
                 "description": "Durable state-layout version; must equal\n[`CROSS_SECTION_STATE_LAYOUT_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "value_policy": {
@@ -2442,7 +2442,7 @@
                 "default": 8192,
                 "description": "Target Arrow batch size used by the `DataFusion` session.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "collect_diagnostics": {
@@ -2459,14 +2459,14 @@
                 "default": 32,
                 "description": "Maximum requested partitions in automatic mode.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "min_rows_per_partition": {
                 "default": 65536,
                 "description": "Minimum input rows assigned to each useful partition.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "parallelism_mode": {
@@ -2478,14 +2478,14 @@
                 "default": 10001,
                 "description": "Inputs below this row count remain single-partition in automatic mode.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "target_partitions": {
                 "default": 1,
                 "description": "Requested partitions in [`DataFusionParallelismMode::Fixed`] mode.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -2584,20 +2584,20 @@
             "properties": {
               "max_matches_per_input_batch": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_state_bytes_per_side": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_state_rows_per_side": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               }
             },
@@ -2614,14 +2614,14 @@
             "properties": {
               "after_micros": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 0.0,
+                "maximum": 9007199254740991,
+                "minimum": 0,
                 "type": "integer"
               },
               "before_micros": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 0.0,
+                "maximum": 9007199254740991,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -2674,7 +2674,7 @@
                   "metrics_version": {
                     "description": "Metric transaction version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -2695,15 +2695,15 @@
                   "metrics_version": {
                     "description": "Metric transaction version; must equal `1`.",
                     "format": "uint32",
-                    "maximum": 1.0,
-                    "minimum": 1.0,
+                    "maximum": 1,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "schema_version": {
                     "description": "Diagnostic schema version; must equal `1`.",
                     "format": "uint32",
-                    "maximum": 1.0,
-                    "minimum": 1.0,
+                    "maximum": 1,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -3239,19 +3239,19 @@
                   },
                   "delay_ms": {
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "emit_interval_ms": {
                     "default": 0,
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "idle_timeout_ms": {
                     "default": null,
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": [
                       "integer",
                       "null"
@@ -3326,13 +3326,13 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3352,8 +3352,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -3371,13 +3371,13 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3398,8 +3398,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -3417,13 +3417,13 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3452,19 +3452,19 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "span": {
                     "description": "Positive exponential span.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -3493,7 +3493,7 @@
                   "size": {
                     "description": "Positive retained row count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -3514,7 +3514,7 @@
                   "micros": {
                     "description": "Positive exact frame width in microseconds.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -3563,13 +3563,13 @@
                   "periods": {
                     "description": "Positive lag distance in rows.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3601,13 +3601,13 @@
                   "periods": {
                     "description": "Positive lag distance in rows.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3635,7 +3635,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3645,13 +3645,13 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "span": {
                     "description": "Positive exponential span.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -3680,7 +3680,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3690,7 +3690,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3718,7 +3718,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3728,7 +3728,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3756,7 +3756,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3766,7 +3766,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3794,7 +3794,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3804,7 +3804,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3824,8 +3824,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "input": {
@@ -3839,7 +3839,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3849,7 +3849,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3882,7 +3882,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3892,7 +3892,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3925,7 +3925,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3935,7 +3935,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3968,7 +3968,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -3978,7 +3978,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -3999,8 +3999,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -4018,7 +4018,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4028,7 +4028,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4050,8 +4050,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -4069,7 +4069,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4079,7 +4079,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4113,7 +4113,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4123,7 +4123,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4156,7 +4156,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4166,7 +4166,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4199,7 +4199,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4209,7 +4209,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4242,7 +4242,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4252,7 +4252,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4285,7 +4285,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4295,7 +4295,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4328,7 +4328,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4338,7 +4338,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4371,7 +4371,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4381,7 +4381,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4414,7 +4414,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4424,7 +4424,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -4445,8 +4445,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -4464,7 +4464,7 @@
                   "min_periods": {
                     "description": "Minimum pairwise-valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4474,7 +4474,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "right": {
@@ -4501,8 +4501,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -4520,7 +4520,7 @@
                   "min_periods": {
                     "description": "Minimum pairwise-valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -4530,7 +4530,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "right": {
@@ -4569,7 +4569,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "right": {
@@ -4595,13 +4595,13 @@
               "allowed_lateness_micros": {
                 "description": "Allowed lateness in exact microseconds (SCE-00 D7).",
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "configuration_version": {
                 "description": "Semantic configuration version; must equal\n[`ROLLING_CONFIGURATION_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "event_time": {
@@ -4640,7 +4640,7 @@
               "state_layout_version": {
                 "description": "Durable state-layout version. Existing primitives use\n[`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires\n[`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance\nrequire [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "value_policy": {
@@ -4677,31 +4677,31 @@
               "max_input_bytes": {
                 "default": 10485760,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "max_rows": {
                 "default": 100000,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "memory_limit_mb": {
                 "default": 512,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "output_rows": {
                 "default": 1000,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "timeout_seconds": {
                 "default": 30,
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -4809,7 +4809,7 @@
               "retention": {
                 "default": 3,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "root": {
@@ -4882,7 +4882,7 @@
                     "description": "Declared logical shape in element dimensions.",
                     "items": {
                       "format": "uint64",
-                      "minimum": 0.0,
+                      "minimum": 0,
                       "type": "integer"
                     },
                     "type": "array"
@@ -4928,8 +4928,8 @@
               },
               "tolerance_micros": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 0.0,
+                "maximum": 9007199254740991,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -5010,20 +5010,20 @@
               "checkpoint_interval_ms": {
                 "default": 30000,
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "max_batch_bytes": {
                 "default": 67108864,
                 "format": "uint",
-                "minimum": 1.0,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_batch_rows": {
                 "default": 10000,
                 "format": "uint",
-                "maximum": 1000000.0,
-                "minimum": 1.0,
+                "maximum": 1000000,
+                "minimum": 1,
                 "type": "integer"
               }
             },
@@ -5075,7 +5075,7 @@
                   "size_micros": {
                     "description": "Window size in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5096,13 +5096,13 @@
                   "size_micros": {
                     "description": "Window size in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "slide_micros": {
                     "description": "Window slide in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5349,14 +5349,14 @@
             "properties": {
               "max_state_bytes": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_state_rows": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               }
             },
@@ -5422,7 +5422,7 @@
                   "width_micros": {
                     "description": "Positive bucket width in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -5456,7 +5456,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "null_placement": {
@@ -5470,7 +5470,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "tie_method": {
@@ -5509,7 +5509,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "null_placement": {
@@ -5523,7 +5523,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "tie_method": {
@@ -5558,7 +5558,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5568,7 +5568,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5596,7 +5596,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5606,7 +5606,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5638,7 +5638,7 @@
                   "min_samples": {
                     "description": "Minimum pairwise-valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5648,7 +5648,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5669,8 +5669,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "input": {
@@ -5684,7 +5684,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5694,7 +5694,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5730,7 +5730,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5740,7 +5740,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "upper": {
@@ -5769,7 +5769,7 @@
                   "count": {
                     "description": "Positive number of ordered values to select.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "include_ties": {
@@ -5787,7 +5787,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null selection result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5797,7 +5797,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5819,7 +5819,7 @@
                   "count": {
                     "description": "Positive number of ordered values to select.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "include_ties": {
@@ -5837,7 +5837,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null selection result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5847,7 +5847,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5884,7 +5884,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5894,7 +5894,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5930,7 +5930,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5940,7 +5940,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -5969,7 +5969,7 @@
                   "min_samples": {
                     "description": "Minimum valid samples required before nulls are filled.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -5979,7 +5979,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -6001,13 +6001,13 @@
               "allowed_lateness_micros": {
                 "description": "Allowed lateness in exact microseconds (SCE-00 D7).",
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "configuration_version": {
                 "description": "Semantic configuration version; must equal\n[`CROSS_SECTION_CONFIGURATION_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "entity_by": {
@@ -6054,7 +6054,7 @@
               "state_layout_version": {
                 "description": "Durable state-layout version; must equal\n[`CROSS_SECTION_STATE_LAYOUT_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "value_policy": {
@@ -6093,7 +6093,7 @@
                 "default": 8192,
                 "description": "Target Arrow batch size used by the `DataFusion` session.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "collect_diagnostics": {
@@ -6110,14 +6110,14 @@
                 "default": 32,
                 "description": "Maximum requested partitions in automatic mode.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "min_rows_per_partition": {
                 "default": 65536,
                 "description": "Minimum input rows assigned to each useful partition.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "parallelism_mode": {
@@ -6129,14 +6129,14 @@
                 "default": 10001,
                 "description": "Inputs below this row count remain single-partition in automatic mode.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "target_partitions": {
                 "default": 1,
                 "description": "Requested partitions in [`DataFusionParallelismMode::Fixed`] mode.",
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -6235,20 +6235,20 @@
             "properties": {
               "max_matches_per_input_batch": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_state_bytes_per_side": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_state_rows_per_side": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 1.0,
+                "maximum": 9007199254740991,
+                "minimum": 1,
                 "type": "integer"
               }
             },
@@ -6265,14 +6265,14 @@
             "properties": {
               "after_micros": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 0.0,
+                "maximum": 9007199254740991,
+                "minimum": 0,
                 "type": "integer"
               },
               "before_micros": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 0.0,
+                "maximum": 9007199254740991,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -6325,7 +6325,7 @@
                   "metrics_version": {
                     "description": "Metric transaction version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -6346,15 +6346,15 @@
                   "metrics_version": {
                     "description": "Metric transaction version; must equal `1`.",
                     "format": "uint32",
-                    "maximum": 1.0,
-                    "minimum": 1.0,
+                    "maximum": 1,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "schema_version": {
                     "description": "Diagnostic schema version; must equal `1`.",
                     "format": "uint32",
-                    "maximum": 1.0,
-                    "minimum": 1.0,
+                    "maximum": 1,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -6890,19 +6890,19 @@
                   },
                   "delay_ms": {
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "emit_interval_ms": {
                     "default": 0,
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "idle_timeout_ms": {
                     "default": null,
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": [
                       "integer",
                       "null"
@@ -6977,13 +6977,13 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7003,8 +7003,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -7022,13 +7022,13 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7049,8 +7049,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -7068,13 +7068,13 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7103,19 +7103,19 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "span": {
                     "description": "Positive exponential span.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -7144,7 +7144,7 @@
                   "size": {
                     "description": "Positive retained row count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -7165,7 +7165,7 @@
                   "micros": {
                     "description": "Positive exact frame width in microseconds.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -7214,13 +7214,13 @@
                   "periods": {
                     "description": "Positive lag distance in rows.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7252,13 +7252,13 @@
                   "periods": {
                     "description": "Positive lag distance in rows.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7286,7 +7286,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7296,13 +7296,13 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "span": {
                     "description": "Positive exponential span.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   }
                 },
@@ -7331,7 +7331,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7341,7 +7341,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7369,7 +7369,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7379,7 +7379,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7407,7 +7407,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7417,7 +7417,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7445,7 +7445,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7455,7 +7455,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7475,8 +7475,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "input": {
@@ -7490,7 +7490,7 @@
                   "min_periods": {
                     "description": "Positive minimum valid sample count.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7500,7 +7500,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7533,7 +7533,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7543,7 +7543,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7576,7 +7576,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7586,7 +7586,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7619,7 +7619,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7629,7 +7629,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7650,8 +7650,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -7669,7 +7669,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7679,7 +7679,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7701,8 +7701,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -7720,7 +7720,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7730,7 +7730,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7764,7 +7764,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7774,7 +7774,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7807,7 +7807,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7817,7 +7817,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7850,7 +7850,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7860,7 +7860,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7893,7 +7893,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7903,7 +7903,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7936,7 +7936,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7946,7 +7946,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -7979,7 +7979,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -7989,7 +7989,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -8022,7 +8022,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -8032,7 +8032,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -8065,7 +8065,7 @@
                   "min_periods": {
                     "description": "Minimum valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -8075,7 +8075,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -8096,8 +8096,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -8115,7 +8115,7 @@
                   "min_periods": {
                     "description": "Minimum pairwise-valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -8125,7 +8125,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "right": {
@@ -8152,8 +8152,8 @@
                   "ddof": {
                     "description": "Degrees-of-freedom adjustment; must be `0` or `1`.",
                     "format": "uint8",
-                    "maximum": 1.0,
-                    "minimum": 0.0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "frame": {
@@ -8171,7 +8171,7 @@
                   "min_periods": {
                     "description": "Minimum pairwise-valid samples for a non-null result.",
                     "format": "uint64",
-                    "minimum": 1.0,
+                    "minimum": 1,
                     "type": "integer"
                   },
                   "output": {
@@ -8181,7 +8181,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "right": {
@@ -8220,7 +8220,7 @@
                   "primitive_version": {
                     "description": "Primitive version; must equal `1`.",
                     "format": "uint32",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "right": {
@@ -8246,13 +8246,13 @@
               "allowed_lateness_micros": {
                 "description": "Allowed lateness in exact microseconds (SCE-00 D7).",
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "configuration_version": {
                 "description": "Semantic configuration version; must equal\n[`ROLLING_CONFIGURATION_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "event_time": {
@@ -8291,7 +8291,7 @@
               "state_layout_version": {
                 "description": "Durable state-layout version. Existing primitives use\n[`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires\n[`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance\nrequire [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].",
                 "format": "uint32",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "value_policy": {
@@ -8328,31 +8328,31 @@
               "max_input_bytes": {
                 "default": 10485760,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "max_rows": {
                 "default": 100000,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "memory_limit_mb": {
                 "default": 512,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "output_rows": {
                 "default": 1000,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "timeout_seconds": {
                 "default": 30,
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -8460,7 +8460,7 @@
               "retention": {
                 "default": 3,
                 "format": "uint",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "root": {
@@ -8533,7 +8533,7 @@
                     "description": "Declared logical shape in element dimensions.",
                     "items": {
                       "format": "uint64",
-                      "minimum": 0.0,
+                      "minimum": 0,
                       "type": "integer"
                     },
                     "type": "array"
@@ -8579,8 +8579,8 @@
               },
               "tolerance_micros": {
                 "format": "uint64",
-                "maximum": 9007199254740991.0,
-                "minimum": 0.0,
+                "maximum": 9007199254740991,
+                "minimum": 0,
                 "type": "integer"
               }
             },
@@ -8661,20 +8661,20 @@
               "checkpoint_interval_ms": {
                 "default": 30000,
                 "format": "uint64",
-                "minimum": 0.0,
+                "minimum": 0,
                 "type": "integer"
               },
               "max_batch_bytes": {
                 "default": 67108864,
                 "format": "uint",
-                "minimum": 1.0,
+                "minimum": 1,
                 "type": "integer"
               },
               "max_batch_rows": {
                 "default": 10000,
                 "format": "uint",
-                "maximum": 1000000.0,
-                "minimum": 1.0,
+                "maximum": 1000000,
+                "minimum": 1,
                 "type": "integer"
               }
             },
@@ -8726,7 +8726,7 @@
                   "size_micros": {
                     "description": "Window size in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -8747,13 +8747,13 @@
                   "size_micros": {
                     "description": "Window size in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   },
                   "slide_micros": {
                     "description": "Window slide in exact microseconds.",
                     "format": "uint64",
-                    "minimum": 0.0,
+                    "minimum": 0,
                     "type": "integer"
                   }
                 },
@@ -9460,7 +9460,7 @@
           },
           "metadata": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+              "$ref": "#/components/schemas/JSONValue"
             },
             "title": "Metadata",
             "type": "object"
@@ -10019,7 +10019,7 @@
           },
           "metadata": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+              "$ref": "#/components/schemas/JSONValue"
             },
             "title": "Metadata",
             "type": "object"
@@ -10027,7 +10027,7 @@
           "rows": {
             "items": {
               "additionalProperties": {
-                "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
+                "$ref": "#/components/schemas/JSONValue"
               },
               "type": "object"
             },
@@ -10347,68 +10347,6 @@
           },
           {
             "$ref": "#/components/schemas/UnavailableWorkerRegistration"
-          }
-        ]
-      },
-      "calc_flow__config__JSONValue-Output": {
-        "anyOf": [
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "integer"
-          },
-          {
-            "type": "number"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "items": {
-              "$ref": "#/components/schemas/calc_flow__config__JSONValue-Output"
-            },
-            "type": "array"
-          },
-          {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/calc_flow__config__JSONValue-Output"
-            },
-            "type": "object"
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
-      "calc_flow_studio__models__JSONValue": {
-        "anyOf": [
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "integer"
-          },
-          {
-            "type": "number"
-          },
-          {
-            "type": "string"
-          },
-          {
-            "items": {
-              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
-            },
-            "type": "array"
-          },
-          {
-            "additionalProperties": {
-              "$ref": "#/components/schemas/calc_flow_studio__models__JSONValue"
-            },
-            "type": "object"
-          },
-          {
-            "type": "null"
           }
         ]
       }

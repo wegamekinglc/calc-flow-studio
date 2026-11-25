@@ -41,6 +41,7 @@ from calc_flow_studio.models import (
     RunStatus,
     ValidationReport,
 )
+from calc_flow_studio.models import ProjectDocument as ProjectDocumentResponse
 from calc_flow_studio.run_manager import (
     CapabilitySnapshotError,
     RunManagerError,
@@ -264,22 +265,22 @@ def register_project_routes(
 
     @app.post(
         f"{API_PREFIX}/projects",
-        response_model=ProjectDocument,
+        response_model=ProjectDocumentResponse,
         status_code=status.HTTP_201_CREATED,
         responses=PROJECT_INVALID_422,
     )
-    async def create_project(request: ProjectCreateRequest) -> ProjectDocument:
+    async def create_project(request: ProjectCreateRequest) -> ProjectDocumentResponse:
         project = request.to_project()
         await validate_for_storage(project)
         try:
             await projects.create(project)
         except CalcFlowError as error:
             raise native_error(error, operation="create") from error
-        return project
+        return ProjectDocumentResponse.from_project(project)
 
     @app.post(
         f"{API_PREFIX}/projects/import",
-        response_model=ProjectDocument,
+        response_model=ProjectDocumentResponse,
         status_code=status.HTTP_201_CREATED,
         responses=PROJECT_INVALID_422,
     )
@@ -287,7 +288,7 @@ def register_project_routes(
         request: Request,
         format_name: str = Query(alias="format", pattern="^(json|yaml)$"),
         replace: bool = False,
-    ) -> ProjectDocument:
+    ) -> ProjectDocumentResponse:
         content = await bounded_request_body(request)
         parser = import_project_json if format_name == "json" else import_project_yaml
         try:
@@ -300,20 +301,22 @@ def register_project_routes(
         except CalcFlowError as error:
             operation = "put" if replace else "create"
             raise native_error(error, operation=operation) from error
-        return project
+        return ProjectDocumentResponse.from_project(project)
 
-    @app.get(f"{API_PREFIX}/projects/{{project_id}}", response_model=ProjectDocument)
-    async def get_project(project_id: str) -> ProjectDocument:
-        return await stored_project(project_id)
+    @app.get(
+        f"{API_PREFIX}/projects/{{project_id}}", response_model=ProjectDocumentResponse
+    )
+    async def get_project(project_id: str) -> ProjectDocumentResponse:
+        return ProjectDocumentResponse.from_project(await stored_project(project_id))
 
     @app.put(
         f"{API_PREFIX}/projects/{{project_id}}",
-        response_model=ProjectDocument,
+        response_model=ProjectDocumentResponse,
         responses=PROJECT_INVALID_422,
     )
     async def put_project(
         project_id: str, request: ProjectCreateRequest
-    ) -> ProjectDocument:
+    ) -> ProjectDocumentResponse:
         project = request.to_project()
         if project.root["id"] != project_id:
             raise http_error(
@@ -325,7 +328,7 @@ def register_project_routes(
             await projects.put(project)
         except CalcFlowError as error:
             raise native_error(error, operation="put") from error
-        return project
+        return ProjectDocumentResponse.from_project(project)
 
     @app.delete(
         f"{API_PREFIX}/projects/{{project_id}}",

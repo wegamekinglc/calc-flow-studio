@@ -111,10 +111,13 @@ command and open `http://127.0.0.1:8765`. Rebuild and reinstall the wheels after
 source changes as described in the installation guide. `npm run build:wheel`
 builds a Studio wheel; it does not install that wheel into the environment.
 
-Regenerate the checked-in API contract after backend route or model changes:
+Regenerate the checked-in API contract after backend route or model changes.
+`sync:api` and `build:wheel` use the
+[release-floor toolchain](../README.md#verification) for generation.
 
 ```bash
 cd web-ui
+npm ci
 npm run sync:api
 ```
 

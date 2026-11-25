@@ -22,7 +22,7 @@ export type RunResponse = components['schemas']['RunResponse'];
 export type ValidationIssue = components['schemas']['ValidationIssue'];
 export type ValidationReport = components['schemas']['ValidationReport'];
 export type CapabilitiesResponse = components['schemas']['CapabilitiesResponse'];
-export type JSONValue = components['schemas']['JSONValue-Input'];
+export type JSONValue = components['schemas']['JSONValue'];
 
 export interface StreamJoinSideMetrics {
   retained_rows: number;

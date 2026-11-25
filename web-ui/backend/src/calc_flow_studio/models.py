@@ -5,7 +5,9 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Annotated, Literal, Self
 
-from calc_flow import ProjectDocument
+import calc_flow
+from calc_flow import ProjectDocument as CoreProjectDocument
+from fastapi.exceptions import RequestValidationError
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -13,6 +15,7 @@ from pydantic import (
     RootModel,
     StrictBool,
     StrictInt,
+    ValidationError,
     field_validator,
     model_validator,
 )
@@ -382,9 +385,28 @@ class PreviewCreateRequest(StrictModel):
     project_id: str = Field(min_length=1, max_length=120)
 
 
-class ProjectCreateRequest(ProjectDocument):
-    def to_project(self) -> ProjectDocument:
-        return ProjectDocument.model_validate(self.root)
+_PROJECT_VALIDATION_ERRORS = (
+    ValidationError,
+    getattr(calc_flow, "ProjectValidationError", ValidationError),
+)
+
+
+class ProjectCreateRequest(RootModel[object]):
+    def to_project(self) -> CoreProjectDocument:
+        try:
+            return CoreProjectDocument.model_validate(self.root)
+        except _PROJECT_VALIDATION_ERRORS as error:
+            errors = [
+                {**entry, "loc": ("body", *entry["loc"])}
+                for entry in error.errors(include_url=False)
+            ]
+            raise RequestValidationError(errors, body=self.root) from error
+
+
+class ProjectDocument(RootModel[dict[str, object]]):
+    @classmethod
+    def from_project(cls, project: CoreProjectDocument) -> Self:
+        return cls(project.model_dump(mode="json"))
 
 
 class ProjectSummary(StrictModel):

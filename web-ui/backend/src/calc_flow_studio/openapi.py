@@ -1,43 +1,36 @@
-"""Keep both embedded project contracts identical to the native JSON Schema."""
+"""Embed the installed core's project JSON Schema in the Studio contract."""
 
 from __future__ import annotations
 
-from calc_flow import ProjectDocument
+import json
+
+from calc_flow import project_json_schema
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
-from calc_flow_studio.models import ProjectCreateRequest
+from calc_flow_studio.models import ProjectCreateRequest, ProjectDocument
 
 
 def project_openapi(app: FastAPI) -> dict:
     if app.openapi_schema is None:
         schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
-        # FastAPI drops null defaults when serializing its OpenAPI model.
+        canonical = json.loads(project_json_schema())
         for model in (ProjectCreateRequest, ProjectDocument):
             component = model.__name__
-            schema["components"]["schemas"][component] = _restore_null_defaults(
-                model.model_json_schema(), schema["components"]["schemas"][component]
-            )
+            prefix = f"#/components/schemas/{component}/$defs/"
+            schema["components"]["schemas"][component] = _rebase_refs(canonical, prefix)
         app.openapi_schema = schema
     return app.openapi_schema
 
 
-def _restore_null_defaults(canonical: object, rendered: object) -> object:
-    if isinstance(canonical, dict) and isinstance(rendered, dict):
-        return _restore_mapping_defaults(canonical, rendered)
-    if isinstance(canonical, list) and isinstance(rendered, list):
-        return [
-            _restore_null_defaults(left, right)
-            for left, right in zip(canonical, rendered, strict=True)
-        ]
-    return rendered
-
-
-def _restore_mapping_defaults(canonical: dict, rendered: dict) -> dict:
-    result = {
-        key: _restore_null_defaults(canonical.get(key), value)
-        for key, value in rendered.items()
-    }
-    if "default" in canonical and canonical["default"] is None:
-        return {**result, "default": None}
-    return result
+def _rebase_refs(value: object, prefix: str) -> object:
+    if isinstance(value, dict):
+        return {
+            key: prefix + item.removeprefix("#/$defs/")
+            if key == "$ref" and isinstance(item, str) and item.startswith("#/$defs/")
+            else _rebase_refs(item, prefix)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_rebase_refs(item, prefix) for item in value]
+    return value
