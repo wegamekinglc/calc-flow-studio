@@ -26,8 +26,9 @@ Install the published core and the editable Studio package with:
 uv sync --package calc-flow-studio --extra dev
 ```
 
-CI tests the published core wheels `2026.10.27` and `2026.11.14`. The full
-backend coverage and browser checks use the release floor `2026.10.27`.
+CI tests backend and browser startup with the published core wheels
+`2026.10.27` and `2026.11.14`. The full backend and browser suites use the
+release floor `2026.10.27`.
 
 To test a source build, run this command from the Calc Flow core checkout:
 

@@ -180,24 +180,53 @@ class CapabilitySnapshotError(RunManagerError):
     """Raised when trusted runtime capability data violates schema version 3."""
 
 
+_V5_PROVIDER_DEFAULTS = {
+    "port_binding": "fixed",
+    "options_json_schema": None,
+    "state_layouts": (),
+}
+
+
+def _capability_wire_name(part: object) -> str:
+    if not isinstance(part, str):
+        return str(part)
+    head, *tail = part.split("_")
+    return head + "".join(item.capitalize() for item in tail)
+
+
+def _capability_error_at(location: str, message: str) -> CapabilitySnapshotError:
+    return CapabilitySnapshotError(
+        "runtime capability snapshot violates schema version 3 at "
+        f"{location}: {message}"
+    )
+
+
 def _capability_snapshot_error(
     error: ValidationError, *, prefix: str = ""
 ) -> CapabilitySnapshotError:
     first = error.errors(include_input=False, include_url=False)[0]
-
-    def wire_name(part: object) -> str:
-        if not isinstance(part, str):
-            return str(part)
-        head, *tail = part.split("_")
-        return head + "".join(item.capitalize() for item in tail)
-
     location = ".".join(
-        filter(None, (prefix, *(wire_name(part) for part in first["loc"])))
+        filter(None, (prefix, *(_capability_wire_name(part) for part in first["loc"])))
     )
-    return CapabilitySnapshotError(
-        "runtime capability snapshot violates schema version 3 at "
-        f"{location or '<root>'}: {first['msg']}"
-    )
+    return _capability_error_at(location or "<root>", first["msg"])
+
+
+def _capability_cache_key(snapshot: RuntimeCapabilities) -> tuple[str, int, int]:
+    version = snapshot.schema_version
+    if type(version) is not int or version not in (3, 5):
+        raise _capability_error_at(
+            "schemaVersion", "Expected core capability schema version 3 or 5"
+        )
+    if version == 5:
+        for index, provider in enumerate(snapshot.providers):
+            for field, default in _V5_PROVIDER_DEFAULTS.items():
+                value = getattr(provider, field, ...)
+                if type(value) is not type(default) or value != default:
+                    raise _capability_error_at(
+                        f"runtime.providers.{index}.{_capability_wire_name(field)}",
+                        f"Expected {default!r} for Studio v3",
+                    )
+    return (snapshot.scope.session_id, snapshot.scope.revision, version)
 
 
 @lru_cache(maxsize=1)
@@ -244,6 +273,10 @@ def _capabilities_response(
     runtime_document = asdict(snapshot)
     runtime_document.pop("schema_version")
     runtime_document["scope"]["kind"] = "runtimeSession"
+    if snapshot.schema_version == 5:
+        for provider in runtime_document["providers"]:
+            for field in _V5_PROVIDER_DEFAULTS:
+                del provider[field]
     parent_identities = {
         (
             (
@@ -286,7 +319,7 @@ def _capabilities_response(
         raise _capability_snapshot_error(error, prefix="runtime") from error
     try:
         return CapabilitiesResponse(
-            schema_version=snapshot.schema_version,
+            schema_version=3,
             runtime=runtime_response,
             preview=PreviewCapabilitiesResponse(
                 input_batch_kinds=("table",),
@@ -1324,7 +1357,7 @@ class RunManager:
         self._jobs: dict[str, _JobHandle] = {}
         self._runtime = runtime
         self._lazy_builtins = _preflight_lazy_builtins()
-        self._capability_cache: dict[tuple[str, int], CapabilitiesResponse] = {}
+        self._capability_cache: dict[tuple[str, int, int], CapabilitiesResponse] = {}
         self._use_processes = use_processes
         self._max_workers = max_workers
         self._max_history = max_history
@@ -1342,7 +1375,7 @@ class RunManager:
             )
         while True:
             snapshot, registrations = self._runtime.capability_registration_snapshot()
-            key = (snapshot.scope.session_id, snapshot.scope.revision)
+            key = _capability_cache_key(snapshot)
             with self._lock:
                 cached = self._capability_cache.get(key)
                 if cached is not None:
@@ -1366,8 +1399,7 @@ class RunManager:
 
             with self._lock:
                 current, _ = self._runtime.capability_registration_snapshot()
-                current_key = (current.scope.session_id, current.scope.revision)
-                if current_key != key:
+                if _capability_cache_key(current) != key:
                     continue
                 cached = self._capability_cache.get(key)
                 if cached is not None:

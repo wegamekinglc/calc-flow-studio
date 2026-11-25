@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import copy
 from datetime import UTC, datetime
 from importlib.metadata import version
 from pathlib import Path
@@ -12,6 +13,8 @@ from calc_flow import (
     FileProjectStore,
     PipelineBuilder,
     ProjectDocument,
+    ProviderOption,
+    ProviderOptionsSchema,
     Runtime,
     project_json_schema,
 )
@@ -402,40 +405,164 @@ def test_capabilities_route_exposes_the_typed_runtime_session_snapshot(
     tmp_path,
 ) -> None:
     runtime = Runtime()
-    runtime.register_provider("test", "identity", "1", lambda batch, _options: batch)
+    runtime.register_provider(
+        "test",
+        "identity",
+        "1",
+        lambda batch, _options: batch,
+        options_schema=ProviderOptionsSchema(
+            fields=(ProviderOption("flag", "boolean", required=True),)
+        ),
+    )
+    snapshot = runtime.capabilities()
 
     with _client(tmp_path, runtime=runtime) as client:
         response = client.get(f"{API_PREFIX}/capabilities")
         catalog = client.get(f"{API_PREFIX}/catalog")
         openapi = client.get("/openapi.json").json()
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
     document = response.json()
     assert document["schemaVersion"] == 3
-    assert document["runtime"]["scope"]["kind"] == "runtimeSession"
-    assert document["runtime"]["scope"]["revision"] == 1
-    assert document["runtime"]["providers"][0]["name"] == "identity"
-    assert document["runtime"]["providers"][0]["modes"] == ["batch"]
-    assert document["runtime"]["providers"][0]["finality"] == "unproven"
-    assert document["runtime"]["providers"][0]["supportsStaticInputs"] is False
-    assert [operator["kind"] for operator in document["runtime"]["operators"]] == [
-        "cross_section",
-        "expression",
-        "rolling",
-        "snapshot_sql",
-        "sql",
-        "stream_asof_join",
-        "stream_join",
-        "window",
+    capabilities = document["runtime"]
+    assert capabilities["packageVersion"] == version("calc-flow-python")
+    assert capabilities["projectFormatVersions"] == [3]
+    assert capabilities["scope"] == {
+        "kind": "runtimeSession",
+        "sessionId": snapshot.scope.session_id,
+        "revision": 1,
+    }
+    [provider] = capabilities["providers"]
+    assert (provider["provider"], provider["name"], provider["version"]) == (
+        "test",
+        "identity",
+        "1",
+    )
+    assert provider["inputPorts"] == [
+        {"name": "input", "kind": "array", "required": True}
     ]
-    assert document["runtime"]["operators"][0]["modes"] == ["batch", "stream"]
-    assert document["runtime"]["operators"][0]["finality"] == "group_final_append_only"
+    assert provider["outputPorts"] == [
+        {"name": "output", "kind": "array", "required": True}
+    ]
+    assert provider["optionsSchema"] == {
+        "fields": [{"name": "flag", "valueType": "boolean", "required": True}],
+        "additionalProperties": False,
+    }
+    assert provider["modes"] == ["batch"]
+    assert provider["finality"] == "unproven"
+    assert provider["supportsStaticInputs"] is False
+    assert {
+        "registrationKind": "provider",
+        "reconstruction": "serialized",
+        "provider": "test",
+        "name": "identity",
+        "version": "1",
+    } in document["preview"]["workerRegistrations"]
+    operators = {operator["kind"]: operator for operator in capabilities["operators"]}
+    assert list(operators) == [operator.kind for operator in snapshot.operators]
+    if snapshot.schema_version == 3:
+        assert list(operators) == [
+            "cross_section",
+            "expression",
+            "rolling",
+            "snapshot_sql",
+            "sql",
+            "stream_asof_join",
+            "stream_join",
+            "window",
+        ]
+    if version("calc-flow-python") == "2026.11.14":
+        assert {"bounded_order", "bounded_over", "distinct"} <= operators.keys()
+    cross_section = operators["cross_section"]
+    assert cross_section["modes"] == ["batch", "stream"]
+    assert cross_section["finality"] == "group_final_append_only"
+    assert any(connector["name"] == "file" for connector in capabilities["connectors"])
+    assert capabilities["lateOutput"] == {
+        "operators": ["cross_section", "rolling"],
+        "schemaVersion": 1,
+        "metricsVersion": 1,
+    }
     assert document["preview"]["inputBatchKinds"] == ["table"]
     assert catalog.json() == []
     capability_operation = openapi["paths"][f"{API_PREFIX}/capabilities"]["get"]
     assert capability_operation["responses"]["200"]["content"]["application/json"][
         "schema"
     ] == {"$ref": "#/components/schemas/CapabilitiesResponse"}
+    assert (
+        openapi["components"]["schemas"]["CapabilitiesResponse"]["properties"][
+            "schemaVersion"
+        ]["const"]
+        == 3
+    )
+
+
+@pytest.mark.parametrize("phase", ["warm_cache", "second_sample"])
+@pytest.mark.parametrize(
+    "field, value, location",
+    [
+        ("schema_version", 4, "schemaVersion"),
+        ("schema_version", 6, "schemaVersion"),
+        ("schema_version", 3.0, "schemaVersion"),
+        ("schema_version", True, "schemaVersion"),
+        ("port_binding", "options", "runtime.providers.0.portBinding"),
+        (
+            "options_json_schema",
+            '{"type":"object"}',
+            "runtime.providers.0.optionsJsonSchema",
+        ),
+        ("state_layouts", (1,), "runtime.providers.0.stateLayouts"),
+    ],
+    ids=[
+        "v4",
+        "v6",
+        "float",
+        "bool",
+        "port-binding",
+        "options-schema",
+        "state-layouts",
+    ],
+)
+def test_capabilities_reject_incompatible_snapshots_before_reuse_or_publish(
+    tmp_path, monkeypatch, phase, field, value, location
+) -> None:
+    runtime = Runtime()
+    runtime.register_provider("test", "identity", "1", lambda batch, _options: batch)
+    snapshot, registrations = runtime.capability_registration_snapshot()
+    invalid = copy(snapshot)
+    # Simulate an inconsistent core sampler without altering the valid snapshot.
+    if field == "schema_version":
+        object.__setattr__(invalid, field, value)
+    else:
+        if snapshot.schema_version != 5:
+            pytest.skip("requires the v5 provider descriptor")
+        [provider] = snapshot.providers
+        invalid_provider = copy(provider)
+        object.__setattr__(invalid_provider, field, value)
+        object.__setattr__(invalid, "providers", (invalid_provider,))
+
+    url = f"{API_PREFIX}/capabilities"
+    with _client(tmp_path, runtime=runtime) as client:
+        baseline = client.get(url)
+        assert baseline.status_code == 200, baseline.text
+
+    with _client(tmp_path, runtime=runtime) as client:
+        if phase == "warm_cache":
+            assert client.get(url).json() == baseline.json()
+            samples = iter((invalid,))
+        else:
+            samples = iter((snapshot, invalid))
+        monkeypatch.setattr(
+            Runtime,
+            "capability_registration_snapshot",
+            lambda _: (next(samples, snapshot), registrations),
+        )
+        rejected = client.get(url)
+        recovered = client.get(url)
+
+    assert rejected.status_code == 500, rejected.text
+    assert f"at {location}:" in rejected.json()["detail"]
+    assert recovered.status_code == 200, recovered.text
+    assert recovered.json() == baseline.json()
 
 
 def test_capabilities_route_reports_a_malformed_runtime_snapshot_as_internal(

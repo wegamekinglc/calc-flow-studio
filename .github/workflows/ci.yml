@@ -89,16 +89,18 @@ jobs:
         run: >-
           uv run --no-sync --project . pytest -vv -o faulthandler_timeout=60
           --cov=calc_flow_studio --cov-report=term-missing --cov-report=xml
-      - name: Verify startup and project contracts with the newer wheel
+      - name: Verify startup, capabilities, and project contracts with the newer wheel
         if: ${{ !matrix.floor }}
         timeout-minutes: 15
         working-directory: web-ui/backend
         run: >-
           uv run --no-sync --project . pytest -vv -o faulthandler_timeout=60
-          tests/test_app.py tests/test_models.py tests/test_late_output_contract.py
+          tests/test_app.py tests/test_models.py tests/test_run_manager.py
+          tests/test_late_output_contract.py
           tests/test_stream_asof_contract.py tests/test_stream_join_validation.py
           tests/test_previews.py tests/test_jobs_v3.py
-          -k 'test_openapi_contains or test_project_crud or test_project_body_errors
+          -k 'test_openapi_contains or test_capabilities or test_capability_probe
+          or test_project_crud or test_project_body_errors
           or test_project_structure_rejections or test_project_create_request
           or test_project_write or test_import_export
           or test_stream_asof_contract or test_stream_join_validation or test_late_openapi
@@ -119,8 +121,20 @@ jobs:
           retention-days: 14
 
   browser-e2e:
-    name: Studio browser workflow
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - core: "2026.10.27"
+            name: Studio browser workflow
+            floor: true
+          - core: "2026.11.14"
+            name: Studio browser startup (2026.11.14)
+            floor: false
+    env:
+      CALC_FLOW_TEST_VERSION: ${{ matrix.core }}
     defaults:
       run:
         working-directory: web-ui
@@ -141,7 +155,7 @@ jobs:
           uv venv --python 3.13
           uv pip install --python .venv/bin/python --only-binary calc-flow-python \
             --constraint web-ui/api-schema-constraints.txt \
-            --editable web-ui/backend calc-flow-python==2026.10.27
+            --editable web-ui/backend "calc-flow-python==$CALC_FLOW_TEST_VERSION"
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
@@ -158,7 +172,11 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run browser workflow
+        if: matrix.floor
         run: npm run test:e2e
+      - name: Verify browser startup with the newer wheel
+        if: ${{ !matrix.floor }}
+        run: npm run test:e2e -- startup.spec.ts
 
   studio-package:
     name: Build + isolated studio wheel smoke test
