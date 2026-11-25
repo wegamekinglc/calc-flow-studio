@@ -306,7 +306,7 @@ export interface components {
         ArrayOutputPreview: {
             /** Backend */
             backend: string;
-            data: components["schemas"]["calc_flow_studio__models__JSONValue"];
+            data: components["schemas"]["JSONValue"];
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -314,7 +314,7 @@ export interface components {
             kind: "array";
             /** Metadata */
             metadata: {
-                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+                [key: string]: components["schemas"]["JSONValue"];
             };
             /** Total Rows */
             total_rows: number;
@@ -732,8 +732,8 @@ export interface components {
              */
             valid: false;
         };
-        "JSONValue-Input": boolean | number | string | components["schemas"]["JSONValue-Input"][] | {
-            [key: string]: components["schemas"]["JSONValue-Input"];
+        JSONValue: boolean | number | string | components["schemas"]["JSONValue"][] | {
+            [key: string]: components["schemas"]["JSONValue"];
         } | null;
         /** JobCreateRequest */
         JobCreateRequest: {
@@ -4202,7 +4202,7 @@ export interface components {
             datafusion_metrics: components["schemas"]["DataFusionMetricPreview"][];
             /** Metadata */
             metadata: {
-                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+                [key: string]: components["schemas"]["JSONValue"];
             };
             /** Node Timings */
             node_timings: {
@@ -4403,11 +4403,11 @@ export interface components {
             kind: "table";
             /** Metadata */
             metadata: {
-                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+                [key: string]: components["schemas"]["JSONValue"];
             };
             /** Rows */
             rows: {
-                [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
+                [key: string]: components["schemas"]["JSONValue"];
             }[];
             /** Schema */
             schema: components["schemas"]["OutputFieldPreview"][];
@@ -4537,12 +4537,6 @@ export interface components {
         };
         ValidationReport: components["schemas"]["ValidValidationReport"] | components["schemas"]["InvalidValidationReport"];
         WorkerRegistrationCapability: components["schemas"]["SerializedWorkerRegistration"] | components["schemas"]["LazyBuiltinWorkerRegistration"] | components["schemas"]["UnavailableWorkerRegistration"];
-        "calc_flow__config__JSONValue-Output": boolean | number | string | components["schemas"]["calc_flow__config__JSONValue-Output"][] | {
-            [key: string]: components["schemas"]["calc_flow__config__JSONValue-Output"];
-        } | null;
-        calc_flow_studio__models__JSONValue: boolean | number | string | components["schemas"]["calc_flow_studio__models__JSONValue"][] | {
-            [key: string]: components["schemas"]["calc_flow_studio__models__JSONValue"];
-        } | null;
     };
     responses: never;
     parameters: never;

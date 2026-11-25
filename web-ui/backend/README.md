@@ -20,7 +20,7 @@ The browser client handles this automatically. Cross-origin requests must come
 from the local Studio development origin.
 See the local [Studio guide](../../docs/studio-guide.md) for execution and
 configuration, and [installation instructions](../../README.md#requirements)
-for upgrading the core dependency or installing the pinned source wheel.
+for upgrading the core dependency or installing a source-built wheel.
 
 Batch execution uses saved input data and the project's bounded preview options:
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
@@ -254,14 +255,24 @@ def _create(client: TestClient, project: dict[str, object] | None = None):
 
 
 def test_openapi_contains_only_v3_routes_and_exact_rust_schema(tmp_path) -> None:
+    app = create_app(
+        project_directory=tmp_path / "projects",
+        checkpoint_directory=tmp_path / "checkpoints",
+    )
+    direct_openapi = app.openapi()
     with _client(tmp_path) as client:
-        openapi = client.get("/openapi.json").json()
+        response = client.get("/openapi.json")
         schema = client.get(f"{API_PREFIX}/schema/project").json()
 
+    assert response.status_code == 200
+    openapi = response.json()
+    assert openapi == direct_openapi
     assert API_PREFIX == "/api/v3"
     assert f"{API_PREFIX}/catalog" in openapi["paths"]
     assert f"{API_PREFIX}/schema/project" in openapi["paths"]
     assert f"{API_PREFIX}/projects/{{project_id}}" in openapi["paths"]
+    assert "post" in openapi["paths"][f"{API_PREFIX}/previews"]
+    assert "post" in openapi["paths"][f"{API_PREFIX}/jobs"]
     assert f"{API_PREFIX}/jobs/{{job_id}}/events" in openapi["paths"]
     assert not any("/runs" in path for path in openapi["paths"])
     assert not any(path.startswith("/api/v2/") for path in openapi["paths"])
@@ -278,17 +289,6 @@ def test_openapi_contains_only_v3_routes_and_exact_rust_schema(tmp_path) -> None
         if name != "StaticInputSpec"
     }
     assert "backend" not in json.dumps(without_static_defs).lower()
-
-    def without_none_defaults(value: object) -> object:
-        if isinstance(value, dict):
-            return {
-                key: without_none_defaults(item)
-                for key, item in value.items()
-                if not (key == "default" and item is None)
-            }
-        if isinstance(value, list):
-            return [without_none_defaults(item) for item in value]
-        return value
 
     def resolve_json_pointer(document: object, pointer: str) -> object:
         assert pointer.startswith("#/")
@@ -334,24 +334,34 @@ def test_openapi_contains_only_v3_routes_and_exact_rust_schema(tmp_path) -> None
 
     for component_name in ("ProjectCreateRequest", "ProjectDocument"):
         component = openapi["components"]["schemas"][component_name]
-        assert (
-            normalize_component_references(component["properties"], component_name)
-            == schema["properties"]
-        )
-        assert component["required"] == schema["required"]
-        assert component["additionalProperties"] is False
-        assert component["$defs"].keys() == schema["$defs"].keys()
-        assert without_none_defaults(
-            normalize_component_references(component["$defs"], component_name)
-        ) == without_none_defaults(schema["$defs"])
-        references = tuple(schema_references(component))
-        assert references
-        for reference in references:
-            assert resolve_json_pointer(openapi, reference)
+        assert normalize_component_references(component, component_name) == schema
         assert component["$defs"]["NodeSpec"]["properties"]["operator"]["$ref"] == (
             f"#/components/schemas/{component_name}/$defs/OperatorSpec"
         )
         assert "JSONValue" not in json.dumps(component)
+
+    for reference in schema_references(openapi):
+        assert resolve_json_pointer(openapi, reference)
+
+    paths = openapi["paths"]
+    collection = paths[f"{API_PREFIX}/projects"]
+    single = paths[f"{API_PREFIX}/projects/{{project_id}}"]
+    import_operation = paths[f"{API_PREFIX}/projects/import"]["post"]
+    for operation in (collection["post"], single["put"]):
+        body = operation["requestBody"]
+        assert body["required"] is True
+        assert body["content"]["application/json"]["schema"] == {
+            "$ref": "#/components/schemas/ProjectCreateRequest"
+        }
+    for operation, status in (
+        (collection["post"], "201"),
+        (single["get"], "200"),
+        (single["put"], "200"),
+        (import_operation, "201"),
+    ):
+        assert operation["responses"][status]["content"]["application/json"][
+            "schema"
+        ] == {"$ref": "#/components/schemas/ProjectDocument"}
 
 
 def test_catalog_is_exact_runtime_metadata_and_validation_uses_canonical_json(
@@ -655,7 +665,10 @@ def test_project_crud_preserves_client_ids_sorting_and_request_values(tmp_path) 
         missing_delete = client.delete(f"{API_PREFIX}/projects/project_alpha")
 
     assert created.status_code == 201
-    assert created.json()["id"] == "project_alpha"
+    assert created.json() == ProjectDocument.model_validate(original).model_dump(
+        mode="json"
+    )
+    assert fetched.json() == created.json()
     assert duplicate.status_code == 409
     assert [item["id"] for item in listed.json()] == [
         "project_alpha",
@@ -663,7 +676,9 @@ def test_project_crud_preserves_client_ids_sorting_and_request_values(tmp_path) 
     ]
     assert listed.json()[0]["node_count"] == 1
     assert fetched.json()["graph"]["nodes"][0]["id"] == "calculate"
-    assert updated.json()["name"] == "Updated"
+    assert updated.json() == ProjectDocument.model_validate(
+        updated_document
+    ).model_dump(mode="json")
     assert mismatch.status_code == 409
     assert original["name"] == "Alpha"
     assert deleted.status_code == 204
@@ -678,6 +693,136 @@ def test_project_creation_rejects_slash_ids(tmp_path) -> None:
 
     assert created.status_code == 422
     assert "invalid_id" in created.text
+
+
+@pytest.mark.parametrize("method", ["POST", "PUT"])
+@pytest.mark.parametrize("body", [b"null", b"", b"{"])
+def test_project_body_errors_preserve_fastapi_locations(tmp_path, method, body) -> None:
+    url = f"{API_PREFIX}/projects"
+    if method == "PUT":
+        url += "/project_alpha"
+    with _client(tmp_path) as client:
+        response = client.request(
+            method, url, content=body, headers={"Content-Type": "application/json"}
+        )
+
+    assert response.status_code == 422
+    [error] = response.json()["detail"]
+    assert error["msg"]
+    if body == b"null":
+        # The two-wheel CI pins FastAPI 0.165.0, which passes JSON null to the
+        # model. Older FastAPI releases can reject it as a missing body.
+        expected_by_version = {"0.150.0": {"missing"}, "0.165.0": {"value_error"}}
+        expected = expected_by_version.get(
+            version("fastapi"), {"value_error", "missing"}
+        )
+        assert error["type"] in expected
+        assert error["loc"] == ["body"]
+        assert error["input"] is None
+    elif body:
+        assert error["type"] == "json_invalid"
+        assert error["loc"] == ["body", 1]
+    else:
+        assert error["type"] == "missing"
+        assert error["loc"] == ["body"]
+
+
+@pytest.mark.parametrize(
+    "invalid_fields, message",
+    [({"unexpected": True}, "unknown field"), ({"format_version": 2}, "expected 3")],
+)
+def test_project_structure_rejections_preserve_validation_details(
+    tmp_path, invalid_fields, message
+) -> None:
+    document = _project() | invalid_fields
+    with _client(tmp_path) as client:
+        responses = (
+            _create(client, document),
+            client.put(f"{API_PREFIX}/projects/project_alpha", json=document),
+        )
+        assert client.get(f"{API_PREFIX}/projects").json() == []
+    for response in responses:
+        assert response.status_code == 422
+        [error] = response.json()["detail"]
+        assert error["type"] == "value_error"
+        assert error["loc"] == ["body"]
+        assert message in error["msg"]
+        assert error["input"] == document
+        assert error["ctx"] == {"error": {}}
+
+
+def test_project_write_rejections_preserve_stored_content(tmp_path) -> None:
+    url = f"{API_PREFIX}/projects"
+    project_url = f"{url}/project_alpha"
+    document = _project()
+    changed = document | {"name": "Changed"}
+    invalid = changed | {"format_version": 2}
+    unexecutable = changed | {"graph": {"name": "empty", "nodes": []}}
+    with _client(tmp_path) as client:
+        created = _create(client, document)
+        assert created.status_code == 201
+        [stored] = (tmp_path / "projects").glob("*.json")
+        original_bytes = stored.read_bytes()
+
+        rejected_create = _create(client, unexecutable | {"id": "rejected"})
+        rejected_update = client.put(project_url, json=unexecutable)
+        rejected_import = client.post(
+            f"{url}/import?format=json&replace=true", content=json.dumps(unexecutable)
+        )
+        for response in (rejected_create, rejected_update, rejected_import):
+            assert response.status_code == 422
+            detail = response.json()["detail"]
+            assert detail["kind"] == "invalid"
+            assert detail["valid"] is False
+            assert detail["fingerprint"] is None
+            assert detail["issues"][0]["path"] == "graph.nodes"
+
+        assert client.put(project_url, json=invalid).status_code == 422
+        for fmt, content in (("json", b"{"), ("yaml", b"graph: [")):
+            malformed = client.post(
+                f"{url}/import?format={fmt}&replace=true", content=content
+            )
+            assert malformed.status_code == 422
+            assert isinstance(malformed.json()["detail"], str)
+        missing_format = client.post(
+            f"{url}/import?replace=true", content=json.dumps(changed)
+        )
+        assert missing_format.status_code == 422
+        [error] = missing_format.json()["detail"]
+        assert error["type"] == "missing"
+        assert error["loc"] == ["query", "format"]
+        assert _create(client, changed).status_code == 409
+        assert (
+            client.put(project_url, json=changed | {"id": "other"}).status_code == 409
+        )
+        assert client.get(project_url).json() == created.json()
+        assert [item["id"] for item in client.get(url).json()] == ["project_alpha"]
+        assert list((tmp_path / "projects").glob("*.json")) == [stored]
+        assert stored.read_bytes() == original_bytes
+
+
+def test_project_write_supports_installed_core_parallelism_modes(tmp_path) -> None:
+    document = _project()
+    document["graph"]["datafusion"] = {"parallelism_mode": "auto_rows"}
+    modes = json.loads(project_json_schema())["$defs"]["DataFusionParallelismMode"]
+    supports_auto_rows = any(mode["const"] == "auto_rows" for mode in modes["oneOf"])
+    core_version = version("calc-flow-python")
+    if core_version in {"2026.10.27", "2026.11.14"}:
+        assert supports_auto_rows == (core_version == "2026.11.14")
+    with _client(tmp_path) as client:
+        created = _create(client, document)
+        if supports_auto_rows:
+            assert created.status_code == 201, created.text
+            assert (
+                created.json()["graph"]["datafusion"]["parallelism_mode"] == "auto_rows"
+            )
+            fetched = client.get(f"{API_PREFIX}/projects/project_alpha")
+            assert fetched.status_code == 200
+            assert fetched.json() == created.json()
+        else:
+            assert created.status_code == 422
+            assert client.get(f"{API_PREFIX}/projects").json() == []
+            assert not list((tmp_path / "projects").glob("*.json"))
 
 
 def test_project_routes_await_async_store_and_never_use_blocking_facades(
@@ -747,6 +892,10 @@ def test_import_export_use_bounded_strict_rust_transforms_and_conflicts(
         yaml_export = client.get(
             f"{API_PREFIX}/projects/project_alpha/export?format=yaml"
         )
+        yaml_import = client.post(
+            f"{API_PREFIX}/projects/import?format=yaml&replace=true",
+            content=yaml_export.content,
+        )
         unsafe = client.post(
             f"{API_PREFIX}/projects/import?format=yaml",
             content="!!python/object/apply:os.system ['id']",
@@ -778,6 +927,8 @@ def test_import_export_use_bounded_strict_rust_transforms_and_conflicts(
     )
     assert yaml_export.status_code == 200
     assert "format_version: 3" in yaml_export.text
+    assert yaml_import.status_code == 201
+    assert yaml_import.json() == replaced.json()
     assert unsafe.status_code == 422
     assert alias.status_code == 422
     assert oversized.status_code == 422

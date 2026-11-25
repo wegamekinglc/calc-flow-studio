@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 import pytest
+from fastapi.exceptions import RequestValidationError
 from pydantic import TypeAdapter, ValidationError
 
 from calc_flow_studio.models import (
@@ -61,20 +62,18 @@ def test_project_create_request_uses_rust_structural_validation_only() -> None:
     for invalid in (
         {**_project(), "format_version": 1},
         {**_project(), "unknown": True},
+        {**_project(), "description": object()},
     ):
-        with pytest.raises(ValidationError):
-            ProjectCreateRequest.model_validate(invalid)
-
-    with pytest.raises(ValidationError):
-        ProjectCreateRequest.model_validate({**_project(), "description": object()})
+        with pytest.raises(RequestValidationError) as exc_info:
+            ProjectCreateRequest.model_validate(invalid).to_project()
+        assert exc_info.value.errors()[0]["loc"] == ("body",)
 
     semantically_invalid = {
         **_project(),
         "graph": {"name": "empty", "nodes": []},
     }
-    assert not ProjectCreateRequest.model_validate(semantically_invalid).root["graph"][
-        "nodes"
-    ]
+    project = ProjectCreateRequest.model_validate(semantically_invalid).to_project()
+    assert not project.root["graph"]["nodes"]
 
 
 def test_transport_models_are_strict_and_frozen() -> None:
