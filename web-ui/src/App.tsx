@@ -865,7 +865,7 @@ export default function App() {
           {project.runtime.mode === 'stream' && (
             <>
               <button className="node-tool sql" type="button" onClick={() => addNode('snapshot_sql')}><span>SQL</span><div><strong>Snapshot SQL</strong><small>Query latest complete relations</small></div></button>
-              <button className="node-tool stream_join" type="button" onClick={() => { addNode('stream_join'); }}><span>⋈</span><div><strong>Stream Join</strong><small>Bounded · event time · inner</small></div></button>
+              <button className="node-tool stream_join" type="button" onClick={() => { addNode('stream_join'); }}><span>⋈</span><div><strong>Stream Join</strong><small>Bounded · event time</small></div></button>
             </>
           )}
 

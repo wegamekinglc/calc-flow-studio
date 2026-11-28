@@ -134,22 +134,32 @@ describe('useJobEvents', () => {
     expect(source.url).toBe('/api/v3/jobs/job-1/events');
   });
 
-  it('closes the stream after authoritative terminal state', async () => {
+  it('receives the final progress before closing on a terminal job', async () => {
     const onUpdate = vi.fn();
+    const onEvent = vi.fn();
     vi.stubGlobal('EventSource', FakeEventSource);
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async () =>
       new Response(JSON.stringify(job('completed'))),
     ));
 
     renderHook(() => {
-      useJobEvents('job-1', onUpdate, vi.fn(), vi.fn());
+      useJobEvents('job-1', onUpdate, onEvent, vi.fn());
     });
     const source = at(FakeEventSource.instances);
+    await act(async () => {
+      source.emit('progress', JSON.stringify({ type: 'progress', throughput_rows: 0 }));
+    });
+    expect(onUpdate).not.toHaveBeenCalled();
+    expect(source.close).not.toHaveBeenCalled();
+
+    const finalProgress = { type: 'progress', throughput_rows: 8 };
     act(() => {
+      source.emit('progress', JSON.stringify(finalProgress));
       source.emit('terminal');
     });
 
     await waitFor(() => expect(onUpdate).toHaveBeenCalledWith(job('completed')));
+    expect(onEvent).toHaveBeenLastCalledWith(finalProgress);
     expect(source.close).toHaveBeenCalledOnce();
   });
 

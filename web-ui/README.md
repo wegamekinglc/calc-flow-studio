@@ -67,6 +67,12 @@ UDFs. Each incoming batch replaces one whole relation; connect the output direct
 to a sink. Imported project-v3 documents also retain the core's cumulative
 sum/min/max/variance primitives and their state-layout version.
 
+For compact streaming SQL aggregates, choose **Retractions and upserts** under
+**Aggregate output** to emit changes with a `_cf_op` column. A Stream Join can
+use **Inner**, **Left semi**, or **Left anti**. Semi and anti joins emit the
+left input schema with its original column names. Imported bounded `OVER`,
+`ORDER`, and `DISTINCT` nodes display their declarations and state limits.
+
 ## Edit data sources
 
 Each Data Source card shows a bounded preview of its current text. Select

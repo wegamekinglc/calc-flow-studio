@@ -224,6 +224,23 @@ export function NodeInspector({
               onChange={(event) => patchSql({ query: event.target.value })}
             />
           </label>
+          {streamMode && node.operator.kind === 'sql' && (
+            <label>
+              Aggregate output
+              <select
+                value={node.operator.aggregate_output ?? 'snapshot'}
+                onChange={(event) => {
+                  const mode = event.target.value;
+                  if (mode === 'snapshot' || mode === 'changelog') {
+                    patchSql({ aggregate_output: mode });
+                  }
+                }}
+              >
+                <option value="snapshot">Cumulative snapshot</option>
+                <option value="changelog">Retractions and upserts</option>
+              </select>
+            </label>
+          )}
         </>
       )}
 
@@ -239,6 +256,25 @@ export function NodeInspector({
       {streamJoin && (
         <section className="inspector-section">
           <h3>Bounded event-time Join</h3>
+          <label>
+            Join type
+            <select
+              value={streamJoin.spec.join_type}
+              onChange={(event) => {
+                const joinType = event.target.value;
+                if (joinType === 'inner' || joinType === 'left_semi' || joinType === 'left_anti') {
+                  patchStreamJoin({ join_type: joinType });
+                }
+              }}
+            >
+              <option value="inner">Inner</option>
+              <option value="left_semi">Left semi</option>
+              <option value="left_anti">Left anti</option>
+            </select>
+          </label>
+          {streamJoin.spec.join_type !== 'inner' && (
+            <p className="muted">Set any explicit output schema to the unprefixed left input columns.</p>
+          )}
           <label>
             Left keys
             <input

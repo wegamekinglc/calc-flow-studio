@@ -573,24 +573,25 @@ describe('Calc Flow Studio', () => {
       static readonly instances: FakeEventSource[] = [];
 
       readonly close = vi.fn();
-      private readonly listeners = new Map<string, Set<() => void>>();
+      private readonly listeners = new Map<string, Set<EventListener>>();
 
       constructor(readonly url: string) {
         FakeEventSource.instances.push(this);
       }
 
-      addEventListener(type: string, listener: () => void) {
+      addEventListener(type: string, listener: EventListener) {
         const listeners = this.listeners.get(type) ?? new Set();
         listeners.add(listener);
         this.listeners.set(type, listeners);
       }
 
-      removeEventListener(type: string, listener: () => void) {
+      removeEventListener(type: string, listener: EventListener) {
         this.listeners.get(type)?.delete(listener);
       }
 
       emit(type: string) {
-        this.listeners.get(type)?.forEach((listener) => listener());
+        const event = new Event(type);
+        this.listeners.get(type)?.forEach((listener) => listener(event));
       }
     }
 

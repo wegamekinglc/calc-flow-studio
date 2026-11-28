@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "generate:api": "node scripts/generate_api.mjs",
-    "sync:api": "uv run --no-project --isolated --python 3.13 --no-build-package calc-flow-python --with-editable ./backend --with calc-flow-python==2026.10.27 --with-requirements api-schema-constraints.txt python scripts/export_openapi.py && npm run generate:api",
+    "sync:api": "uv run --no-project --isolated --python 3.13 --no-build-package calc-flow-python --with-editable ./backend --with-requirements api-schema-constraints.txt python scripts/export_openapi.py && npm run generate:api",
     "benchmark": "vitest bench --run"
   },
   "dependencies": {

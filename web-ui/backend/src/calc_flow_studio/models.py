@@ -611,7 +611,7 @@ class DataFusionMetricPreview(StrictModel):
     coalesce_operator_count: StrictInt = Field(ge=0)
     output_rows: StrictInt = Field(ge=0)
     configured_batch_size: StrictInt = Field(ge=1)
-    parallelism_mode: Literal["fixed", "auto"]
+    parallelism_mode: Literal["fixed", "auto", "auto_rows", "auto_plan"]
     configured_target_partitions: StrictInt = Field(ge=1)
     requested_target_partitions: StrictInt = Field(ge=1)
     effective_target_partitions: StrictInt = Field(ge=1)

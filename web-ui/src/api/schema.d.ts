@@ -583,7 +583,7 @@ export interface components {
              * Parallelism Mode
              * @enum {string}
              */
-            parallelism_mode: "fixed" | "auto";
+            parallelism_mode: "fixed" | "auto" | "auto_rows" | "auto_plan";
             /** Partition Limit Reason */
             partition_limit_reason: string;
             /** Physical Metric Count */
@@ -966,6 +966,23 @@ export interface components {
                     /** @description Output column name. */
                     output: string;
                 };
+                /** @description An input-only analytic expression; aliases are appended in declaration order. */
+                AnalyticExpr: {
+                    /** @constant */
+                    kind: "row_number";
+                    name: string;
+                } | {
+                    column: string;
+                    /** @constant */
+                    kind: "lag";
+                    name: string;
+                } | {
+                    column: string;
+                    frame: components["schemas"]["ProjectCreateRequest"]["$defs"]["RowsFrame"];
+                    /** @constant */
+                    kind: "sum";
+                    name: string;
+                };
                 ArrowFieldSpec: {
                     data_type: string;
                     name: string;
@@ -1345,7 +1362,7 @@ export interface components {
                      */
                     collect_diagnostics: boolean;
                     /**
-                     * @description Enables bounded SQL `AVG` and compatible paired `COUNT` rolling rewrites.
+                     * @description Enables supported bounded SQL rolling rewrites.
                      * @default true
                      */
                     enable_rolling_rewrite: boolean;
@@ -1380,7 +1397,7 @@ export interface components {
                     target_partitions: number;
                 };
                 /** @description Selects the requested `DataFusion` partition policy. */
-                DataFusionParallelismMode: "fixed" | "auto";
+                DataFusionParallelismMode: "fixed" | "auto" | "auto_rows" | "auto_plan";
                 DataSourceSpec: {
                     data: unknown;
                     format: string;
@@ -1392,6 +1409,49 @@ export interface components {
                  * @enum {string}
                  */
                 DeliveryRequest: "best_effort" | "at_least_once" | "exactly_once";
+                /** @description Complete input domain for final-only DISTINCT. */
+                DistinctHistory: {
+                    /** @constant */
+                    kind: "bounded_source";
+                } | {
+                    /**
+                     * Format: int64
+                     * @description Exclusive UTC microsecond coordinate.
+                     */
+                    end_micros: number;
+                    /** @description An unchanged or purely renamed timestamp input column. */
+                    event_time_column: string;
+                    /** @constant */
+                    kind: "closed_window";
+                    /**
+                     * Format: int64
+                     * @description Inclusive UTC microsecond coordinate.
+                     */
+                    start_micros: number;
+                };
+                DistinctLatePolicy: {
+                    /** @constant */
+                    kind: "error";
+                    /** @constant */
+                    scope: "envelope";
+                } | {
+                    /** @constant */
+                    kind: "drop";
+                    /** @constant */
+                    metrics_version: 1;
+                };
+                /**
+                 * @description DISTINCT domain and mandatory owned peak limits.
+                 *
+                 *     Every input is copied. Unknown external backing temporarily borrowed during
+                 *     synchronous admission is outside `max_bytes`; retained data is always owned.
+                 */
+                DistinctSpec: {
+                    history: components["schemas"]["ProjectCreateRequest"]["$defs"]["DistinctHistory"];
+                    ingress_policy: components["schemas"]["ProjectCreateRequest"]["$defs"]["IngressPolicy"];
+                    late_policy?: components["schemas"]["ProjectCreateRequest"]["$defs"]["DistinctLatePolicy"];
+                    state_budget: components["schemas"]["ProjectCreateRequest"]["$defs"]["StateBudget"];
+                };
                 EdgeSpec: {
                     source_node: string;
                     /** @default output */
@@ -1405,6 +1465,17 @@ export interface components {
                     name: string;
                     version: string;
                 };
+                FrameKind: {
+                    /** @constant */
+                    kind: "cumulative";
+                } | {
+                    /** @constant */
+                    kind: "preceding";
+                    /** Format: uint32 */
+                    rows: number;
+                };
+                /** @enum {string} */
+                IngressPolicy: "copy_visible_v2";
                 /** @description Hard logical state and per-input fan-out limits. */
                 JoinStateLimits: {
                     /** Format: uint64 */
@@ -1451,6 +1522,8 @@ export interface components {
                      */
                     schema_version: number;
                 };
+                /** @description One readout of a shared complete MACD recurrence. */
+                MacdComponent: "line" | "signal" | "histogram";
                 NodeSpec: {
                     id: string;
                     /** @default [] */
@@ -1467,6 +1540,22 @@ export interface components {
                  */
                 NullPlacement: "exclude" | "first" | "last";
                 OperatorSpec: {
+                    expressions: components["schemas"]["ProjectCreateRequest"]["$defs"]["AnalyticExpr"][];
+                    /** @constant */
+                    kind: "bounded_over";
+                    spec: components["schemas"]["ProjectCreateRequest"]["$defs"]["OverSpec"];
+                } | {
+                    by: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortKey"][];
+                    fetch: components["schemas"]["ProjectCreateRequest"]["$defs"]["OrderFetch"];
+                    /** @constant */
+                    kind: "bounded_order";
+                    spec: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortSpec"];
+                } | {
+                    columns: string[];
+                    /** @constant */
+                    kind: "distinct";
+                    spec: components["schemas"]["ProjectCreateRequest"]["$defs"]["DistinctSpec"];
+                } | {
                     /** @default  */
                     expression: string;
                     filter?: string | null;
@@ -1477,6 +1566,7 @@ export interface components {
                     /** @default [] */
                     udfs: components["schemas"]["ProjectCreateRequest"]["$defs"]["UdfReference"][];
                 } | {
+                    aggregate_output?: components["schemas"]["ProjectCreateRequest"]["$defs"]["SqlAggregateOutputMode"];
                     aliases: string[];
                     /** @constant */
                     kind: "sql";
@@ -1524,6 +1614,36 @@ export interface components {
                     provider: string;
                     version: string;
                 };
+                OrderFetch: number | null;
+                OverHistory: {
+                    /** @constant */
+                    kind: "bounded_source";
+                } | {
+                    /** Format: int64 */
+                    end_micros: number;
+                    event_time_column: string;
+                    /** @constant */
+                    kind: "closed_window";
+                    /** Format: int64 */
+                    start_micros: number;
+                };
+                /** @enum {string} */
+                OverIngressPolicy: "copy_visible_v2";
+                /** @description One partition and total order shared by all analytic expressions. */
+                OverOrder: {
+                    order_by: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortKey"][];
+                    partition_by: components["schemas"]["ProjectCreateRequest"]["$defs"]["OverPartitionColumns"];
+                    sequence_by: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortSequenceColumns"];
+                };
+                OverPartitionColumns: string[];
+                /** @description A complete H, mandatory owned peak budget and local late policy. */
+                OverSpec: {
+                    history: components["schemas"]["ProjectCreateRequest"]["$defs"]["OverHistory"];
+                    ingress_policy: components["schemas"]["ProjectCreateRequest"]["$defs"]["OverIngressPolicy"];
+                    late_policy: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortLatePolicy"];
+                    order: components["schemas"]["ProjectCreateRequest"]["$defs"]["OverOrder"];
+                    state_budget: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortBudget"];
+                };
                 PipelineSpec: {
                     /**
                      * @default {
@@ -1542,6 +1662,8 @@ export interface components {
                     edges: components["schemas"]["ProjectCreateRequest"]["$defs"]["EdgeSpec"][];
                     name: string;
                     nodes: components["schemas"]["ProjectCreateRequest"]["$defs"]["NodeSpec"][];
+                    /** @description Relation update interpretation; omitted legacy graphs keep their original bytes. */
+                    update_semantics?: components["schemas"]["ProjectCreateRequest"]["$defs"]["UpdateSemantics"];
                 };
                 PortSpec: {
                     kind: components["schemas"]["ProjectCreateRequest"]["$defs"]["BatchKind"];
@@ -1746,14 +1868,6 @@ export interface components {
                     micros: number;
                 };
                 /**
-                 * @description Versioned floating-point behavior for rolling numeric transitions.
-                 *
-                 *     `StableV1` remains the default and preserves the released operation order.
-                 *     `StableV2Preview` is an explicit opt-in experiment whose serialized name is
-                 *     `stable_v2`; it may not replace the default without a separate migration.
-                 */
-                RollingNumericalProfile: "stable_v1" | "stable_v2";
-                /**
                  * @description One declared rolling output and its output column name.
                  *
                  *     # Examples
@@ -1772,6 +1886,88 @@ export interface components {
                  *     ```
                  */
                 RollingOutputSpec: {
+                    /** @description Line, signal or histogram readout; all share one state owner. */
+                    component: components["schemas"]["ProjectCreateRequest"]["$defs"]["MacdComponent"];
+                    /**
+                     * Format: uint64
+                     * @description Positive fast span, strictly smaller than the slow span.
+                     * @default 12
+                     */
+                    fast_span: number;
+                    /** @description Signed/unsigned integer or floating input column. */
+                    input: string;
+                    /** @constant */
+                    kind: "macd_component";
+                    /**
+                     * Format: uint64
+                     * @description Independent positive fast/slow warm-up count, without a span cap.
+                     * @default 1
+                     */
+                    min_periods: number;
+                    /** @description Selected nullable Float64 output column. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                    /**
+                     * Format: uint64
+                     * @description Independent positive signal warm-up count, without a span cap.
+                     * @default 1
+                     */
+                    signal_min_periods: number;
+                    /**
+                     * Format: uint64
+                     * @description Independent positive signal span.
+                     * @default 9
+                     */
+                    signal_span: number;
+                    /**
+                     * Format: uint64
+                     * @description Positive slow span.
+                     * @default 26
+                     */
+                    slow_span: number;
+                } | {
+                    /** @description Float32 or Float64 price column. */
+                    input: string;
+                    /** @constant */
+                    kind: "rsi";
+                    /** @description Nullable Float64 output column. */
+                    output: string;
+                    /**
+                     * Format: uint64
+                     * @description Positive number of seed differences and Wilder period.
+                     */
+                    period: number;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Float32 or Float64 close column. */
+                    close: string;
+                    /** @description Float32 or Float64 high column. */
+                    high: string;
+                    /** @constant */
+                    kind: "atr";
+                    /** @description Float32 or Float64 low column. */
+                    low: string;
+                    /** @description Nullable Float64 output column. */
+                    output: string;
+                    /**
+                     * Format: uint64
+                     * @description Positive number of seed true ranges and Wilder period.
+                     */
+                    period: number;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
                     /** @description Input column name. */
                     input: string;
                     /** @constant */
@@ -2258,12 +2454,6 @@ export interface components {
                     event_time: string;
                     /** @description Late-row policy. */
                     late_policy: components["schemas"]["ProjectCreateRequest"]["$defs"]["LatePolicySpec"];
-                    /**
-                     * @description Versioned floating-point behavior. `stable_v1` is omitted from the
-                     *     canonical configuration so existing project and checkpoint hashes stay
-                     *     compatible; `stable_v2` is an explicit preview opt-in.
-                     */
-                    numerical_profile?: components["schemas"]["ProjectCreateRequest"]["$defs"]["RollingNumericalProfile"];
                     /** @description Rolling outputs in semantic declaration order. */
                     outputs: components["schemas"]["ProjectCreateRequest"]["$defs"]["RollingOutputSpec"][];
                     /** @description Ordered non-empty entity partition key. */
@@ -2272,10 +2462,13 @@ export interface components {
                     sequence_by: string[];
                     /**
                      * Format: uint32
-                     * @description Durable state-layout version. Existing primitives use
+                     * @description Project-document declaration level for the rolling feature set. This is
+                     *     distinct from the durable checkpoint encoding. Existing primitives use
                      *     [`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires
                      *     [`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance
-                     *     require [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].
+                     *     require [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`]. RSI and ATR require
+                     *     [`ROLLING_INDICATOR_STATE_LAYOUT_VERSION`]; MACD components require
+                     *     [`ROLLING_MACD_STATE_LAYOUT_VERSION`].
                      */
                     state_layout_version: number;
                     /** @description Frozen null/NaN value policy. */
@@ -2286,6 +2479,8 @@ export interface components {
                  *     section 5.2).
                  */
                 RollingValuePolicy: "stateful_numeric_v1";
+                /** @description An inclusive ROWS frame ending at the current row. */
+                RowsFrame: components["schemas"]["ProjectCreateRequest"]["$defs"]["FrameKind"];
                 RunOptions: {
                     /**
                      * Format: uint
@@ -2335,8 +2530,104 @@ export interface components {
                 };
                 /** @description Where a secret reference is resolved from. */
                 SecretResolverKind: "environment" | "file" | "registered";
+                SortBudget: {
+                    max_bytes: number;
+                    max_rows: number;
+                };
                 /** @description Sort direction of an order-statistic output (SCE-00 D6). */
                 SortDirection: "ascending" | "descending";
+                /** @description The complete finite domain accepted by a final ordering node. */
+                SortHistory: {
+                    /** @constant */
+                    kind: "bounded_source";
+                } | {
+                    /**
+                     * Format: int64
+                     * @description Exclusive microsecond coordinate.
+                     */
+                    end_micros: number;
+                    /** @description Original or purely renamed input timestamp. */
+                    event_time_column: string;
+                    /** @constant */
+                    kind: "closed_window";
+                    /**
+                     * Format: int64
+                     * @description Inclusive microsecond coordinate.
+                     */
+                    start_micros: number;
+                };
+                /** @enum {string} */
+                SortIngressPolicy: "copy_visible_v2";
+                /** @description One direct column comparator. NULL rows are retained. */
+                SortKey: {
+                    column: string;
+                    direction: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortDirection"];
+                    nulls: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortNulls"];
+                };
+                SortLatePolicy: {
+                    /** @constant */
+                    kind: "error";
+                    /** @constant */
+                    scope: "envelope";
+                } | {
+                    /** @constant */
+                    kind: "drop";
+                    /** @constant */
+                    metrics_version: 1;
+                };
+                /** @enum {string} */
+                SortNulls: "first" | "last";
+                SortSequenceColumns: string[];
+                /** @description Explicit complete-history ordering with a mandatory node-owned peak budget. */
+                SortSpec: {
+                    history: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortHistory"];
+                    ingress_policy: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortIngressPolicy"];
+                    late_policy: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortLatePolicy"];
+                    /** Format: uint64 */
+                    offset: number;
+                    state_budget: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortBudget"];
+                    ties: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortTies"];
+                };
+                /** @description Explicit ordering of equal primary keys. */
+                SortTies: {
+                    /** @constant */
+                    kind: "unspecified";
+                } | {
+                    /** @description Original nonnullable fields checked unique over H. */
+                    columns: components["schemas"]["ProjectCreateRequest"]["$defs"]["SortSequenceColumns"];
+                    /** @constant */
+                    kind: "sequence";
+                };
+                /** @description Selects the visible relation emitted by a compact streaming SQL aggregate. */
+                SqlAggregateOutputMode: "snapshot" | "changelog";
+                /**
+                 * @description Maximum retained rows and operator-defined logical bytes.
+                 *
+                 *     The byte count is an operator-defined deterministic logical charge; it is
+                 *     not a process-wide resident-memory measurement.
+                 *     Rolling operators containing RSI, ATR or MACD bound participating peak storage,
+                 *     including isolated candidates, prepared output, scratch and live checkpoint
+                 *     segments. This applies to both finite and streaming evaluation, including
+                 *     other rolling outputs in the same operator. Old-only rolling operators
+                 *     retain their retained-state limit and exclude checkpoint copies, including
+                 *     when explicitly declared with indicator state layout 5 or 6.
+                 *     Indicator logical footprints include observable Arrow buffer storage and
+                 *     Array/container descriptors, excluding private immutable Buffer owner
+                 *     control blocks whose shared identity Arrow does not expose.
+                 *     Owned String, Box and Vec storage retain their defined logical charges.
+                 *     Pure accounting owner-key/reservation indexes are not recursively charged;
+                 *     they may only reference already funded owners and numerical charges. This
+                 *     does not exempt computation, row/key/history, schema, output, segment or
+                 *     workspace containers, or shorten the funded lifetime of data in a lease.
+                 *     The default uses the largest JSON-safe counters. Use [`StateBudget::new`]
+                 *     to impose operational row and byte limits.
+                 */
+                StateBudget: {
+                    /** Format: uint64 */
+                    max_bytes: number;
+                    /** Format: uint64 */
+                    max_rows: number;
+                };
                 /** @description Managed state location and checkpoint retention for stream projects. */
                 StateConfig: {
                     /**
@@ -2382,7 +2673,7 @@ export interface components {
                     /** Format: uint64 */
                     tolerance_micros: number;
                 };
-                /** @description Immutable declaration for a two-input bounded inner stream Join. */
+                /** @description Immutable declaration for a two-input bounded event-time Join. */
                 StreamJoinSpec: {
                     bounds: components["schemas"]["ProjectCreateRequest"]["$defs"]["JoinTimeBounds"];
                     join_type: components["schemas"]["ProjectCreateRequest"]["$defs"]["StreamJoinType"];
@@ -2395,7 +2686,7 @@ export interface components {
                     right_prefix: string;
                 };
                 /** @description Supported Join semantics. */
-                StreamJoinType: "inner";
+                StreamJoinType: "inner" | "left_semi" | "left_anti";
                 /**
                  * @description Continuous runtime limits carried by project v3.
                  *
@@ -2428,6 +2719,8 @@ export interface components {
                     provider: string;
                     version: string;
                 };
+                /** @description How consumers interpret complete relation updates, independently of lifecycle. */
+                UpdateSemantics: "legacy_append" | "latest_relation";
                 /** @description Fixed UTC window geometry represented in exact microseconds. */
                 WindowGeometry: {
                     /** @constant */
@@ -2499,6 +2792,23 @@ export interface components {
                     function: components["schemas"]["ProjectDocument"]["$defs"]["AggregateFunction"];
                     /** @description Output column name. */
                     output: string;
+                };
+                /** @description An input-only analytic expression; aliases are appended in declaration order. */
+                AnalyticExpr: {
+                    /** @constant */
+                    kind: "row_number";
+                    name: string;
+                } | {
+                    column: string;
+                    /** @constant */
+                    kind: "lag";
+                    name: string;
+                } | {
+                    column: string;
+                    frame: components["schemas"]["ProjectDocument"]["$defs"]["RowsFrame"];
+                    /** @constant */
+                    kind: "sum";
+                    name: string;
                 };
                 ArrowFieldSpec: {
                     data_type: string;
@@ -2879,7 +3189,7 @@ export interface components {
                      */
                     collect_diagnostics: boolean;
                     /**
-                     * @description Enables bounded SQL `AVG` and compatible paired `COUNT` rolling rewrites.
+                     * @description Enables supported bounded SQL rolling rewrites.
                      * @default true
                      */
                     enable_rolling_rewrite: boolean;
@@ -2914,7 +3224,7 @@ export interface components {
                     target_partitions: number;
                 };
                 /** @description Selects the requested `DataFusion` partition policy. */
-                DataFusionParallelismMode: "fixed" | "auto";
+                DataFusionParallelismMode: "fixed" | "auto" | "auto_rows" | "auto_plan";
                 DataSourceSpec: {
                     data: unknown;
                     format: string;
@@ -2926,6 +3236,49 @@ export interface components {
                  * @enum {string}
                  */
                 DeliveryRequest: "best_effort" | "at_least_once" | "exactly_once";
+                /** @description Complete input domain for final-only DISTINCT. */
+                DistinctHistory: {
+                    /** @constant */
+                    kind: "bounded_source";
+                } | {
+                    /**
+                     * Format: int64
+                     * @description Exclusive UTC microsecond coordinate.
+                     */
+                    end_micros: number;
+                    /** @description An unchanged or purely renamed timestamp input column. */
+                    event_time_column: string;
+                    /** @constant */
+                    kind: "closed_window";
+                    /**
+                     * Format: int64
+                     * @description Inclusive UTC microsecond coordinate.
+                     */
+                    start_micros: number;
+                };
+                DistinctLatePolicy: {
+                    /** @constant */
+                    kind: "error";
+                    /** @constant */
+                    scope: "envelope";
+                } | {
+                    /** @constant */
+                    kind: "drop";
+                    /** @constant */
+                    metrics_version: 1;
+                };
+                /**
+                 * @description DISTINCT domain and mandatory owned peak limits.
+                 *
+                 *     Every input is copied. Unknown external backing temporarily borrowed during
+                 *     synchronous admission is outside `max_bytes`; retained data is always owned.
+                 */
+                DistinctSpec: {
+                    history: components["schemas"]["ProjectDocument"]["$defs"]["DistinctHistory"];
+                    ingress_policy: components["schemas"]["ProjectDocument"]["$defs"]["IngressPolicy"];
+                    late_policy?: components["schemas"]["ProjectDocument"]["$defs"]["DistinctLatePolicy"];
+                    state_budget: components["schemas"]["ProjectDocument"]["$defs"]["StateBudget"];
+                };
                 EdgeSpec: {
                     source_node: string;
                     /** @default output */
@@ -2939,6 +3292,17 @@ export interface components {
                     name: string;
                     version: string;
                 };
+                FrameKind: {
+                    /** @constant */
+                    kind: "cumulative";
+                } | {
+                    /** @constant */
+                    kind: "preceding";
+                    /** Format: uint32 */
+                    rows: number;
+                };
+                /** @enum {string} */
+                IngressPolicy: "copy_visible_v2";
                 /** @description Hard logical state and per-input fan-out limits. */
                 JoinStateLimits: {
                     /** Format: uint64 */
@@ -2985,6 +3349,8 @@ export interface components {
                      */
                     schema_version: number;
                 };
+                /** @description One readout of a shared complete MACD recurrence. */
+                MacdComponent: "line" | "signal" | "histogram";
                 NodeSpec: {
                     id: string;
                     /** @default [] */
@@ -3001,6 +3367,22 @@ export interface components {
                  */
                 NullPlacement: "exclude" | "first" | "last";
                 OperatorSpec: {
+                    expressions: components["schemas"]["ProjectDocument"]["$defs"]["AnalyticExpr"][];
+                    /** @constant */
+                    kind: "bounded_over";
+                    spec: components["schemas"]["ProjectDocument"]["$defs"]["OverSpec"];
+                } | {
+                    by: components["schemas"]["ProjectDocument"]["$defs"]["SortKey"][];
+                    fetch: components["schemas"]["ProjectDocument"]["$defs"]["OrderFetch"];
+                    /** @constant */
+                    kind: "bounded_order";
+                    spec: components["schemas"]["ProjectDocument"]["$defs"]["SortSpec"];
+                } | {
+                    columns: string[];
+                    /** @constant */
+                    kind: "distinct";
+                    spec: components["schemas"]["ProjectDocument"]["$defs"]["DistinctSpec"];
+                } | {
                     /** @default  */
                     expression: string;
                     filter?: string | null;
@@ -3011,6 +3393,7 @@ export interface components {
                     /** @default [] */
                     udfs: components["schemas"]["ProjectDocument"]["$defs"]["UdfReference"][];
                 } | {
+                    aggregate_output?: components["schemas"]["ProjectDocument"]["$defs"]["SqlAggregateOutputMode"];
                     aliases: string[];
                     /** @constant */
                     kind: "sql";
@@ -3058,6 +3441,36 @@ export interface components {
                     provider: string;
                     version: string;
                 };
+                OrderFetch: number | null;
+                OverHistory: {
+                    /** @constant */
+                    kind: "bounded_source";
+                } | {
+                    /** Format: int64 */
+                    end_micros: number;
+                    event_time_column: string;
+                    /** @constant */
+                    kind: "closed_window";
+                    /** Format: int64 */
+                    start_micros: number;
+                };
+                /** @enum {string} */
+                OverIngressPolicy: "copy_visible_v2";
+                /** @description One partition and total order shared by all analytic expressions. */
+                OverOrder: {
+                    order_by: components["schemas"]["ProjectDocument"]["$defs"]["SortKey"][];
+                    partition_by: components["schemas"]["ProjectDocument"]["$defs"]["OverPartitionColumns"];
+                    sequence_by: components["schemas"]["ProjectDocument"]["$defs"]["SortSequenceColumns"];
+                };
+                OverPartitionColumns: string[];
+                /** @description A complete H, mandatory owned peak budget and local late policy. */
+                OverSpec: {
+                    history: components["schemas"]["ProjectDocument"]["$defs"]["OverHistory"];
+                    ingress_policy: components["schemas"]["ProjectDocument"]["$defs"]["OverIngressPolicy"];
+                    late_policy: components["schemas"]["ProjectDocument"]["$defs"]["SortLatePolicy"];
+                    order: components["schemas"]["ProjectDocument"]["$defs"]["OverOrder"];
+                    state_budget: components["schemas"]["ProjectDocument"]["$defs"]["SortBudget"];
+                };
                 PipelineSpec: {
                     /**
                      * @default {
@@ -3076,6 +3489,8 @@ export interface components {
                     edges: components["schemas"]["ProjectDocument"]["$defs"]["EdgeSpec"][];
                     name: string;
                     nodes: components["schemas"]["ProjectDocument"]["$defs"]["NodeSpec"][];
+                    /** @description Relation update interpretation; omitted legacy graphs keep their original bytes. */
+                    update_semantics?: components["schemas"]["ProjectDocument"]["$defs"]["UpdateSemantics"];
                 };
                 PortSpec: {
                     kind: components["schemas"]["ProjectDocument"]["$defs"]["BatchKind"];
@@ -3280,14 +3695,6 @@ export interface components {
                     micros: number;
                 };
                 /**
-                 * @description Versioned floating-point behavior for rolling numeric transitions.
-                 *
-                 *     `StableV1` remains the default and preserves the released operation order.
-                 *     `StableV2Preview` is an explicit opt-in experiment whose serialized name is
-                 *     `stable_v2`; it may not replace the default without a separate migration.
-                 */
-                RollingNumericalProfile: "stable_v1" | "stable_v2";
-                /**
                  * @description One declared rolling output and its output column name.
                  *
                  *     # Examples
@@ -3306,6 +3713,88 @@ export interface components {
                  *     ```
                  */
                 RollingOutputSpec: {
+                    /** @description Line, signal or histogram readout; all share one state owner. */
+                    component: components["schemas"]["ProjectDocument"]["$defs"]["MacdComponent"];
+                    /**
+                     * Format: uint64
+                     * @description Positive fast span, strictly smaller than the slow span.
+                     * @default 12
+                     */
+                    fast_span: number;
+                    /** @description Signed/unsigned integer or floating input column. */
+                    input: string;
+                    /** @constant */
+                    kind: "macd_component";
+                    /**
+                     * Format: uint64
+                     * @description Independent positive fast/slow warm-up count, without a span cap.
+                     * @default 1
+                     */
+                    min_periods: number;
+                    /** @description Selected nullable Float64 output column. */
+                    output: string;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                    /**
+                     * Format: uint64
+                     * @description Independent positive signal warm-up count, without a span cap.
+                     * @default 1
+                     */
+                    signal_min_periods: number;
+                    /**
+                     * Format: uint64
+                     * @description Independent positive signal span.
+                     * @default 9
+                     */
+                    signal_span: number;
+                    /**
+                     * Format: uint64
+                     * @description Positive slow span.
+                     * @default 26
+                     */
+                    slow_span: number;
+                } | {
+                    /** @description Float32 or Float64 price column. */
+                    input: string;
+                    /** @constant */
+                    kind: "rsi";
+                    /** @description Nullable Float64 output column. */
+                    output: string;
+                    /**
+                     * Format: uint64
+                     * @description Positive number of seed differences and Wilder period.
+                     */
+                    period: number;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
+                    /** @description Float32 or Float64 close column. */
+                    close: string;
+                    /** @description Float32 or Float64 high column. */
+                    high: string;
+                    /** @constant */
+                    kind: "atr";
+                    /** @description Float32 or Float64 low column. */
+                    low: string;
+                    /** @description Nullable Float64 output column. */
+                    output: string;
+                    /**
+                     * Format: uint64
+                     * @description Positive number of seed true ranges and Wilder period.
+                     */
+                    period: number;
+                    /**
+                     * Format: uint32
+                     * @description Primitive version; must equal `1`.
+                     */
+                    primitive_version: number;
+                } | {
                     /** @description Input column name. */
                     input: string;
                     /** @constant */
@@ -3792,12 +4281,6 @@ export interface components {
                     event_time: string;
                     /** @description Late-row policy. */
                     late_policy: components["schemas"]["ProjectDocument"]["$defs"]["LatePolicySpec"];
-                    /**
-                     * @description Versioned floating-point behavior. `stable_v1` is omitted from the
-                     *     canonical configuration so existing project and checkpoint hashes stay
-                     *     compatible; `stable_v2` is an explicit preview opt-in.
-                     */
-                    numerical_profile?: components["schemas"]["ProjectDocument"]["$defs"]["RollingNumericalProfile"];
                     /** @description Rolling outputs in semantic declaration order. */
                     outputs: components["schemas"]["ProjectDocument"]["$defs"]["RollingOutputSpec"][];
                     /** @description Ordered non-empty entity partition key. */
@@ -3806,10 +4289,13 @@ export interface components {
                     sequence_by: string[];
                     /**
                      * Format: uint32
-                     * @description Durable state-layout version. Existing primitives use
+                     * @description Project-document declaration level for the rolling feature set. This is
+                     *     distinct from the durable checkpoint encoding. Existing primitives use
                      *     [`ROLLING_STATE_LAYOUT_VERSION`]; EWMA requires
                      *     [`ROLLING_EWMA_STATE_LAYOUT_VERSION`]. Cumulative sum/min/max/variance
-                     *     require [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`].
+                     *     require [`ROLLING_CUMULATIVE_STATE_LAYOUT_VERSION`]. RSI and ATR require
+                     *     [`ROLLING_INDICATOR_STATE_LAYOUT_VERSION`]; MACD components require
+                     *     [`ROLLING_MACD_STATE_LAYOUT_VERSION`].
                      */
                     state_layout_version: number;
                     /** @description Frozen null/NaN value policy. */
@@ -3820,6 +4306,8 @@ export interface components {
                  *     section 5.2).
                  */
                 RollingValuePolicy: "stateful_numeric_v1";
+                /** @description An inclusive ROWS frame ending at the current row. */
+                RowsFrame: components["schemas"]["ProjectDocument"]["$defs"]["FrameKind"];
                 RunOptions: {
                     /**
                      * Format: uint
@@ -3869,8 +4357,104 @@ export interface components {
                 };
                 /** @description Where a secret reference is resolved from. */
                 SecretResolverKind: "environment" | "file" | "registered";
+                SortBudget: {
+                    max_bytes: number;
+                    max_rows: number;
+                };
                 /** @description Sort direction of an order-statistic output (SCE-00 D6). */
                 SortDirection: "ascending" | "descending";
+                /** @description The complete finite domain accepted by a final ordering node. */
+                SortHistory: {
+                    /** @constant */
+                    kind: "bounded_source";
+                } | {
+                    /**
+                     * Format: int64
+                     * @description Exclusive microsecond coordinate.
+                     */
+                    end_micros: number;
+                    /** @description Original or purely renamed input timestamp. */
+                    event_time_column: string;
+                    /** @constant */
+                    kind: "closed_window";
+                    /**
+                     * Format: int64
+                     * @description Inclusive microsecond coordinate.
+                     */
+                    start_micros: number;
+                };
+                /** @enum {string} */
+                SortIngressPolicy: "copy_visible_v2";
+                /** @description One direct column comparator. NULL rows are retained. */
+                SortKey: {
+                    column: string;
+                    direction: components["schemas"]["ProjectDocument"]["$defs"]["SortDirection"];
+                    nulls: components["schemas"]["ProjectDocument"]["$defs"]["SortNulls"];
+                };
+                SortLatePolicy: {
+                    /** @constant */
+                    kind: "error";
+                    /** @constant */
+                    scope: "envelope";
+                } | {
+                    /** @constant */
+                    kind: "drop";
+                    /** @constant */
+                    metrics_version: 1;
+                };
+                /** @enum {string} */
+                SortNulls: "first" | "last";
+                SortSequenceColumns: string[];
+                /** @description Explicit complete-history ordering with a mandatory node-owned peak budget. */
+                SortSpec: {
+                    history: components["schemas"]["ProjectDocument"]["$defs"]["SortHistory"];
+                    ingress_policy: components["schemas"]["ProjectDocument"]["$defs"]["SortIngressPolicy"];
+                    late_policy: components["schemas"]["ProjectDocument"]["$defs"]["SortLatePolicy"];
+                    /** Format: uint64 */
+                    offset: number;
+                    state_budget: components["schemas"]["ProjectDocument"]["$defs"]["SortBudget"];
+                    ties: components["schemas"]["ProjectDocument"]["$defs"]["SortTies"];
+                };
+                /** @description Explicit ordering of equal primary keys. */
+                SortTies: {
+                    /** @constant */
+                    kind: "unspecified";
+                } | {
+                    /** @description Original nonnullable fields checked unique over H. */
+                    columns: components["schemas"]["ProjectDocument"]["$defs"]["SortSequenceColumns"];
+                    /** @constant */
+                    kind: "sequence";
+                };
+                /** @description Selects the visible relation emitted by a compact streaming SQL aggregate. */
+                SqlAggregateOutputMode: "snapshot" | "changelog";
+                /**
+                 * @description Maximum retained rows and operator-defined logical bytes.
+                 *
+                 *     The byte count is an operator-defined deterministic logical charge; it is
+                 *     not a process-wide resident-memory measurement.
+                 *     Rolling operators containing RSI, ATR or MACD bound participating peak storage,
+                 *     including isolated candidates, prepared output, scratch and live checkpoint
+                 *     segments. This applies to both finite and streaming evaluation, including
+                 *     other rolling outputs in the same operator. Old-only rolling operators
+                 *     retain their retained-state limit and exclude checkpoint copies, including
+                 *     when explicitly declared with indicator state layout 5 or 6.
+                 *     Indicator logical footprints include observable Arrow buffer storage and
+                 *     Array/container descriptors, excluding private immutable Buffer owner
+                 *     control blocks whose shared identity Arrow does not expose.
+                 *     Owned String, Box and Vec storage retain their defined logical charges.
+                 *     Pure accounting owner-key/reservation indexes are not recursively charged;
+                 *     they may only reference already funded owners and numerical charges. This
+                 *     does not exempt computation, row/key/history, schema, output, segment or
+                 *     workspace containers, or shorten the funded lifetime of data in a lease.
+                 *     The default uses the largest JSON-safe counters. Use [`StateBudget::new`]
+                 *     to impose operational row and byte limits.
+                 */
+                StateBudget: {
+                    /** Format: uint64 */
+                    max_bytes: number;
+                    /** Format: uint64 */
+                    max_rows: number;
+                };
                 /** @description Managed state location and checkpoint retention for stream projects. */
                 StateConfig: {
                     /**
@@ -3916,7 +4500,7 @@ export interface components {
                     /** Format: uint64 */
                     tolerance_micros: number;
                 };
-                /** @description Immutable declaration for a two-input bounded inner stream Join. */
+                /** @description Immutable declaration for a two-input bounded event-time Join. */
                 StreamJoinSpec: {
                     bounds: components["schemas"]["ProjectDocument"]["$defs"]["JoinTimeBounds"];
                     join_type: components["schemas"]["ProjectDocument"]["$defs"]["StreamJoinType"];
@@ -3929,7 +4513,7 @@ export interface components {
                     right_prefix: string;
                 };
                 /** @description Supported Join semantics. */
-                StreamJoinType: "inner";
+                StreamJoinType: "inner" | "left_semi" | "left_anti";
                 /**
                  * @description Continuous runtime limits carried by project v3.
                  *
@@ -3962,6 +4546,8 @@ export interface components {
                     provider: string;
                     version: string;
                 };
+                /** @description How consumers interpret complete relation updates, independently of lifecycle. */
+                UpdateSemantics: "legacy_append" | "latest_relation";
                 /** @description Fixed UTC window geometry represented in exact microseconds. */
                 WindowGeometry: {
                     /** @constant */

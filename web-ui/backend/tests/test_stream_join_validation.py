@@ -128,7 +128,7 @@ def test_import_with_malformed_raw_join_returns_the_validation_report_envelope(
         {
             "path": "graph.nodes[0].operator.spec.join_type",
             "code": "unsupported_join_type",
-            "message": "join_type must be the string inner",
+            "message": "join_type must be inner, left_semi, or left_anti",
         }
     ]
 
