@@ -460,19 +460,9 @@ def test_capabilities_route_exposes_the_typed_runtime_session_snapshot(
     } in document["preview"]["workerRegistrations"]
     operators = {operator["kind"]: operator for operator in capabilities["operators"]}
     assert list(operators) == [operator.kind for operator in snapshot.operators]
-    if snapshot.schema_version == 3:
-        assert list(operators) == [
-            "cross_section",
-            "expression",
-            "rolling",
-            "snapshot_sql",
-            "sql",
-            "stream_asof_join",
-            "stream_join",
-            "window",
-        ]
-    if version("calc-flow-python") == "2026.11.14":
-        assert {"bounded_order", "bounded_over", "distinct"} <= operators.keys()
+    assert {"bounded_order", "bounded_over", "distinct"} <= operators.keys()
+    for operator in snapshot.operators:
+        assert operators[operator.kind]["stateLayouts"] == list(operator.state_layouts)
     cross_section = operators["cross_section"]
     assert cross_section["modes"] == ["batch", "stream"]
     assert cross_section["finality"] == "group_final_append_only"
@@ -928,28 +918,19 @@ def test_project_write_rejections_preserve_stored_content(tmp_path) -> None:
         assert stored.read_bytes() == original_bytes
 
 
-def test_project_write_supports_installed_core_parallelism_modes(tmp_path) -> None:
+@pytest.mark.parametrize("mode", ["auto_rows", "auto_plan"])
+def test_project_write_supports_installed_core_parallelism_modes(
+    tmp_path, mode
+) -> None:
     document = _project()
-    document["graph"]["datafusion"] = {"parallelism_mode": "auto_rows"}
-    modes = json.loads(project_json_schema())["$defs"]["DataFusionParallelismMode"]
-    supports_auto_rows = any(mode["const"] == "auto_rows" for mode in modes["oneOf"])
-    core_version = version("calc-flow-python")
-    if core_version in {"2026.10.27", "2026.11.14"}:
-        assert supports_auto_rows == (core_version == "2026.11.14")
+    document["graph"]["datafusion"] = {"parallelism_mode": mode}
     with _client(tmp_path) as client:
         created = _create(client, document)
-        if supports_auto_rows:
-            assert created.status_code == 201, created.text
-            assert (
-                created.json()["graph"]["datafusion"]["parallelism_mode"] == "auto_rows"
-            )
-            fetched = client.get(f"{API_PREFIX}/projects/project_alpha")
-            assert fetched.status_code == 200
-            assert fetched.json() == created.json()
-        else:
-            assert created.status_code == 422
-            assert client.get(f"{API_PREFIX}/projects").json() == []
-            assert not list((tmp_path / "projects").glob("*.json"))
+        assert created.status_code == 201, created.text
+        assert created.json()["graph"]["datafusion"]["parallelism_mode"] == mode
+        fetched = client.get(f"{API_PREFIX}/projects/project_alpha")
+        assert fetched.status_code == 200
+        assert fetched.json() == created.json()
 
 
 def test_project_routes_await_async_store_and_never_use_blocking_facades(

@@ -1,3 +1,4 @@
+calc-flow-python==2026.11.29
 fastapi==0.165.0
 pydantic==2.14.4
 starlette==1.10.0

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { JobEvent, JobResponse } from '../types';
@@ -108,6 +108,9 @@ describe('ResultsPanel', () => {
 
     expect(screen.getByText('worker_failed')).toBeInTheDocument();
     expect(screen.getByText('worker exited unexpectedly')).toBeInTheDocument();
+    const metrics = screen.getByRole('region', { name: 'Continuous job metrics' });
+    expect(within(metrics).getByText('failed', { exact: true })).toBeInTheDocument();
+    expect(within(metrics).getByText('42 rows')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Checkpoint' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Graceful stop' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();

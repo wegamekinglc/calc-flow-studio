@@ -48,18 +48,19 @@ export function useJobEvents(
       }
     };
 
-    const refresh = async (): Promise<boolean> => {
+    const refresh = async (acceptTerminal: boolean): Promise<boolean> => {
       if (!isLive()) return true;
       const revision = ++refreshRevision;
       try {
         const current = await api.job(jobId);
         if (!isLive()) return true;
         if (revision !== refreshRevision) return false;
+        const terminal = isTerminalJobStatus(current.status);
+        // Keep receiving progress until the terminal SSE event arrives.
+        if (terminal && !acceptTerminal) return false;
         onUpdate(current);
-        if (isTerminalJobStatus(current.status)) {
-          stop();
-          return true;
-        }
+        if (terminal) stop();
+        return terminal;
       } catch (error) {
         if (!isLive()) return true;
         if (revision !== refreshRevision) return false;
@@ -75,7 +76,7 @@ export function useJobEvents(
 
     const poll = async () => {
       if (!isLive()) return;
-      if (await refresh()) return;
+      if (await refresh(true)) return;
       if (!isLive()) return;
       pollTimer = window.setTimeout(() => {
         pollTimer = undefined;
@@ -99,7 +100,7 @@ export function useJobEvents(
           // The status refresh still recovers from a malformed optional summary.
         }
       }
-      void refresh();
+      void refresh(raw.type === 'terminal');
     };
     const handleOpen = () => {
       consecutiveErrors = 0;

@@ -34,20 +34,8 @@ jobs:
         run: npm audit --omit=dev
 
   studio-backend:
-    name: ${{ matrix.name }}
+    name: Studio backend tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - core: "2026.10.27"
-            name: Studio backend tests
-            floor: true
-          - core: "2026.11.14"
-            name: Studio startup and project contracts (2026.11.14)
-            floor: false
-    env:
-      CALC_FLOW_TEST_VERSION: ${{ matrix.core }}
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -60,7 +48,6 @@ jobs:
         with:
           enable-cache: true
       - name: Set up Node.js
-        if: matrix.floor
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 20.20.0
@@ -71,17 +58,8 @@ jobs:
           uv venv --python 3.13
           uv pip install --python .venv/bin/python --only-binary calc-flow-python \
             --constraint web-ui/api-schema-constraints.txt \
-            --editable 'web-ui/backend[dev]' "calc-flow-python==$CALC_FLOW_TEST_VERSION"
-          .venv/bin/python - <<'PY'
-          from importlib.metadata import version
-          from os import environ
-
-          installed = version("calc-flow-python")
-          print(f"calc-flow-python {installed}")
-          assert installed == environ["CALC_FLOW_TEST_VERSION"]
-          PY
+            --editable 'web-ui/backend[dev]'
       - name: Run studio backend coverage
-        if: matrix.floor
         timeout-minutes: 15
         working-directory: web-ui/backend
         env:
@@ -89,30 +67,12 @@ jobs:
         run: >-
           uv run --no-sync --project . pytest -vv -o faulthandler_timeout=60
           --cov=calc_flow_studio --cov-report=term-missing --cov-report=xml
-      - name: Verify startup, capabilities, and project contracts with the newer wheel
-        if: ${{ !matrix.floor }}
-        timeout-minutes: 15
-        working-directory: web-ui/backend
-        run: >-
-          uv run --no-sync --project . pytest -vv -o faulthandler_timeout=60
-          tests/test_app.py tests/test_models.py tests/test_run_manager.py
-          tests/test_late_output_contract.py
-          tests/test_stream_asof_contract.py tests/test_stream_join_validation.py
-          tests/test_previews.py tests/test_jobs_v3.py
-          -k 'test_openapi_contains or test_capabilities or test_capability_probe
-          or test_project_crud or test_project_body_errors
-          or test_project_structure_rejections or test_project_create_request
-          or test_project_write or test_import_export
-          or test_stream_asof_contract or test_stream_join_validation or test_late_openapi
-          or test_raw_late_requests or test_late_policy_errors or test_previews or test_jobs_v3'
       - name: Verify generated API contract
-        if: matrix.floor
         run: |
           npm --prefix web-ui ci
           npm --prefix web-ui run sync:api
           git diff --exit-code -- schemas/project-v3.schema.json web-ui/openapi.json web-ui/src/api/schema.d.ts
       - name: Upload studio coverage report
-        if: matrix.floor
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: studio-python-coverage
@@ -121,20 +81,8 @@ jobs:
           retention-days: 14
 
   browser-e2e:
-    name: ${{ matrix.name }}
+    name: Studio browser workflow
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - core: "2026.10.27"
-            name: Studio browser workflow
-            floor: true
-          - core: "2026.11.14"
-            name: Studio browser startup (2026.11.14)
-            floor: false
-    env:
-      CALC_FLOW_TEST_VERSION: ${{ matrix.core }}
     defaults:
       run:
         working-directory: web-ui
@@ -155,7 +103,7 @@ jobs:
           uv venv --python 3.13
           uv pip install --python .venv/bin/python --only-binary calc-flow-python \
             --constraint web-ui/api-schema-constraints.txt \
-            --editable web-ui/backend "calc-flow-python==$CALC_FLOW_TEST_VERSION"
+            --editable web-ui/backend
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
@@ -172,11 +120,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Run browser workflow
-        if: matrix.floor
         run: npm run test:e2e
-      - name: Verify browser startup with the newer wheel
-        if: ${{ !matrix.floor }}
-        run: npm run test:e2e -- startup.spec.ts
 
   studio-package:
     name: Build + isolated studio wheel smoke test
@@ -206,17 +150,15 @@ jobs:
           npm --prefix web-ui ci
           npm --prefix web-ui run build
           uv build --project web-ui/backend --wheel --out-dir dist
-      - name: Install and inspect studio wheels
+      - name: Install and inspect the Studio wheel
         run: |
-          for core_version in 2026.10.27 2026.11.14; do
-            wheel_env="$RUNNER_TEMP/calc-flow-studio-wheel-$core_version"
-            uv venv --python 3.13 "$wheel_env"
-            uv pip install --python "$wheel_env/bin/python" --only-binary calc-flow-python \
-              --constraint web-ui/api-schema-constraints.txt \
-              "calc-flow-python==$core_version" dist/calc_flow_studio-*.whl packaging
-            test -x "$wheel_env/bin/calc-flow-web"
-            "$wheel_env/bin/python" - "$core_version" <<'PY'
-          import sys
+          wheel_env="$RUNNER_TEMP/calc-flow-studio-wheel"
+          uv venv --python 3.13 "$wheel_env"
+          uv pip install --python "$wheel_env/bin/python" --only-binary calc-flow-python \
+            --constraint web-ui/api-schema-constraints.txt \
+            dist/calc_flow_studio-*.whl packaging
+          test -x "$wheel_env/bin/calc-flow-web"
+          "$wheel_env/bin/python" - <<'PY'
           import tomllib
           from importlib.metadata import requires, version
           from pathlib import Path
@@ -250,12 +192,10 @@ jobs:
           assert not any("fastapi" in item.lower() for item in core_requirements)
           assert not any("uvicorn" in item.lower() for item in core_requirements)
           assert expected_core in [Requirement(item) for item in studio_requirements]
-          assert version("calc-flow-python") == sys.argv[1]
           assert version("calc-flow-python") in expected_core.specifier
           index = next(route for route in app.routes if route.path == "/").endpoint()
           assert Path(index.path).is_file()
           PY
-          done
       - name: Upload release artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:

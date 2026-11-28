@@ -137,6 +137,9 @@ const structuredSourceExpressions = (node: NodeConfig): string[] => {
   if (operator.kind === 'cross_section') {
     return operator.spec.outputs.map(crossSectionSource);
   }
+  if (operator.kind === 'bounded_over') return operator.expressions.map(stableJson);
+  if (operator.kind === 'bounded_order') return operator.by.map(stableJson);
+  if (operator.kind === 'distinct') return operator.columns;
   if (operator.kind === 'window' || operator.kind === 'stream_join' || operator.kind === 'stream_asof_join') {
     return [stableJson(operator.spec)];
   }
@@ -233,8 +236,15 @@ const stateFact = (node: NodeConfig): string => {
     const { max_state_rows: rows, max_state_bytes: bytes } = operator.spec.limits;
     return `bounded · rows≤${rows} total · bytes≤${bytes} total`;
   }
+  if (operator.kind === 'bounded_over' || operator.kind === 'bounded_order' || operator.kind === 'distinct') {
+    const { max_rows: rows, max_bytes: bytes } = operator.spec.state_budget;
+    return `bounded · rows≤${rows} · bytes≤${bytes}`;
+  }
   if (operator.kind === 'window') return 'bounded by declared window';
   if (operator.kind === 'snapshot_sql') return 'latest complete relations · checkpointed replacement state';
+  if (operator.kind === 'sql' && operator.aggregate_output === 'changelog') {
+    return 'aggregate state · retract/upsert changelog';
+  }
   if (operator.kind === 'external') return 'unknown · provider lifecycle not encoded';
   return 'stateless';
 };
@@ -263,6 +273,12 @@ const watermarkFact = (node: NodeConfig): string => {
   }
   if (operator.kind === 'stream_asof_join') {
     return 'required on both inputs · strictly past left time · idle waits';
+  }
+  if (operator.kind === 'bounded_over' || operator.kind === 'bounded_order' || operator.kind === 'distinct') {
+    const history = operator.spec.history;
+    return history.kind === 'closed_window'
+      ? `closes at watermark or EOF · event_time=${history.event_time_column}`
+      : 'finalizes at bounded source EOF';
   }
   if (operator.kind === 'window') return 'required by window finality';
   if (operator.kind === 'external') {

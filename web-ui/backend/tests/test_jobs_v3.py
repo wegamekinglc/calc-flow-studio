@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import queue
 import time
+from hashlib import sha256
 from os import DirEntry
 from pathlib import Path
 from types import SimpleNamespace
@@ -271,9 +272,8 @@ def test_snapshot_sql_project_round_trip_and_native_job(tmp_path: Path) -> None:
         }
     ]
     (tmp_path / "input.json").write_text('{"value": 2}\n{"value": 3}\n')
-    manager = RunManager(
-        use_processes=False, checkpoint_directory=tmp_path / "checkpoints"
-    )
+    checkpoints = tmp_path / "checkpoints"
+    manager = RunManager(use_processes=False, checkpoint_directory=checkpoints)
     app = create_app(project_directory=tmp_path / "projects", run_manager=manager)
     with TestClient(app) as client:
         created = client.post("/api/v3/projects", json=project)
@@ -290,6 +290,79 @@ def test_snapshot_sql_project_round_trip_and_native_job(tmp_path: Path) -> None:
     files = list(tmp_path.rglob("*.parquet"))
     assert len(files) == 1
     assert pq.read_table(files[0])["result"].to_pylist() == [5]
+    [manifest_path] = checkpoints.rglob("epoch-*.json")
+    manifest = json.loads(manifest_path.read_text())
+    assert manifest["format_version"] == 4
+    assert manifest["job_kind"] == "runner"
+
+    restarted = RunManager(use_processes=False, checkpoint_directory=checkpoints)
+    with TestClient(
+        create_app(project_directory=tmp_path / "projects", run_manager=restarted)
+    ) as client:
+        started = client.post("/api/v3/jobs", json={"project_id": "snapshot_project"})
+        assert started.status_code == 202, started.text
+        _wait_for_status(restarted, started.json()["id"], RunStatus.COMPLETED)
+    assert list(tmp_path.rglob("*.parquet")) == files
+    assert json.loads(manifest_path.read_text()) == manifest
+
+
+def test_job_start_reports_legacy_checkpoint_directory_without_starting_worker(
+    tmp_path: Path,
+) -> None:
+    checkpoints = tmp_path / "checkpoints"
+    checkpoint_directory = checkpoints / sha256(b"stream_project").hexdigest()
+    legacy = checkpoint_directory / "state/manifests/manifest-00000000000000000001.json"
+    legacy.parent.mkdir(parents=True)
+    legacy.write_text('{"format_version":3}')
+    (tmp_path / "input.json").write_text('{"value": 2}\n')
+    manager = RunManager(use_processes=False, checkpoint_directory=checkpoints)
+    with TestClient(
+        create_app(project_directory=tmp_path / "projects", run_manager=manager)
+    ) as client:
+        created = client.post("/api/v3/projects", json=_stream_project(tmp_path))
+        assert created.status_code == 201, created.text
+        response = client.post("/api/v3/jobs", json={"project_id": "stream_project"})
+        assert response.status_code == 422, response.text
+        assert "v3 checkpoints" in response.json()["detail"]
+        assert str(checkpoint_directory) in response.json()["detail"]
+        assert manager.list_jobs() == ()
+    assert legacy.read_text() == '{"format_version":3}'
+    assert not list(tmp_path.rglob("*.parquet"))
+
+
+def test_stream_sql_changelog_preserves_mode_and_writes_upserts(tmp_path: Path) -> None:
+    project = _stream_project(tmp_path)
+    operator = {
+        "kind": "sql",
+        "query": "SELECT group_id, SUM(value) AS result FROM input GROUP BY group_id",
+        "aliases": ["input"],
+        "aggregate_output": "changelog",
+    }
+    project["graph"]["nodes"][0]["operator"] = operator
+    (tmp_path / "input.json").write_text(
+        '{"group_id":1,"value":2}\n{"group_id":1,"value":3}\n'
+    )
+    manager = RunManager(
+        use_processes=False, checkpoint_directory=tmp_path / "checkpoints"
+    )
+    with TestClient(
+        create_app(project_directory=tmp_path / "projects", run_manager=manager)
+    ) as client:
+        created = client.post("/api/v3/projects", json=project)
+        assert created.status_code == 201, created.text
+        exported = client.get("/api/v3/projects/stream_project/export?format=json")
+        assert exported.json()["graph"]["nodes"][0]["operator"] == {
+            **operator,
+            "udfs": [],
+        }
+        started = client.post("/api/v3/jobs", json={"project_id": "stream_project"})
+        assert started.status_code == 202, started.text
+        _wait_for_status(manager, started.json()["id"], RunStatus.COMPLETED)
+
+    [output] = tmp_path.rglob("*.parquet")
+    assert pq.ParquetFile(output).read().to_pylist() == [
+        {"group_id": 1, "result": 5, "_cf_op": "upsert"}
+    ]
 
 
 def test_resource_limits_use_exact_byte_contract(tmp_path: Path) -> None:

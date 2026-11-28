@@ -1578,6 +1578,16 @@ class RunManager:
                 raise RunManagerError(
                     "checkpoint directory must not be a symbolic link"
                 )
+            manifest_directory = work_directory / "state" / "manifests"
+            if any(
+                path.suffix.lower() == ".json"
+                for path in manifest_directory.glob("manifest-*", case_sensitive=True)
+            ):
+                raise RunManagerError(
+                    "This project has v3 checkpoints. Move the checkpoint directory "
+                    f"{str(work_directory)!r} aside to start a new v4 lineage. "
+                    "Use a fresh sink destination if the source will replay."
+                )
             document = json.loads(project.canonical_json())
             document["state"]["root"] = str(work_directory / "state")
             project_json = json.dumps(

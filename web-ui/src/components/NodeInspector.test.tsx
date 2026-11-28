@@ -154,11 +154,24 @@ describe('NodeInspector', () => {
         onChange={onChange}
         onSqlAliasEdit={onSqlAliasEdit}
         onDelete={vi.fn()}
+        streamMode
       />,
     );
 
     expect(screen.getByLabelText('Input alias 1')).toHaveValue('left');
     expect(screen.getByLabelText('Input alias 2')).toHaveValue('right');
+
+    if (kind === 'sql') {
+      const output = screen.getByLabelText('Aggregate output');
+      expect(output).toHaveValue('snapshot');
+      fireEvent.change(output, { target: { value: 'changelog' } });
+      expect(onChange).toHaveBeenLastCalledWith({
+        ...node,
+        operator: { ...node.operator, aggregate_output: 'changelog' },
+      });
+    } else {
+      expect(screen.queryByLabelText('Aggregate output')).not.toBeInTheDocument();
+    }
 
     fireEvent.change(screen.getByLabelText('DataFusion SQL'), {
       target: { value: 'SELECT id FROM left' },
@@ -223,6 +236,14 @@ describe('NodeInspector', () => {
         onDelete={vi.fn()}
       />,
     );
+
+    const joinType = screen.getByLabelText('Join type');
+    expect(joinType).toHaveValue('inner');
+    fireEvent.change(joinType, { target: { value: 'left_anti' } });
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...node,
+      operator: { ...node.operator, spec: { ...node.operator.spec, join_type: 'left_anti' } },
+    });
 
     fireEvent.change(screen.getByLabelText('before micros'), {
       target: { value: '150.75' },

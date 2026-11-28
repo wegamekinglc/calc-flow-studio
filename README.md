@@ -18,7 +18,7 @@ editing, validating, previewing, and running Calc Flow projects locally.
 
 - Python 3.13 or newer and uv.
 - Node.js 20.19+ (20.x), 22.13+ (22.x), or 24+, with npm. CI uses 20.20.0.
-- `calc-flow-python>=2026.10.27,<2027`.
+- `calc-flow-python>=2026.11.29,<2027`.
 
 Install the published core and the editable Studio package with:
 
@@ -26,9 +26,8 @@ Install the published core and the editable Studio package with:
 uv sync --package calc-flow-studio --extra dev
 ```
 
-CI tests backend and browser startup with the published core wheels
-`2026.10.27` and `2026.11.14`. The full backend and browser suites use the
-release floor `2026.10.27`.
+CI runs the full backend and browser suites with the published `2026.11.29`
+core wheel.
 
 To test a source build, run this command from the Calc Flow core checkout:
 
@@ -53,7 +52,16 @@ After upgrading an existing checkout, rerun `uv sync --package calc-flow-studio
 --extra dev` to refresh the dependencies. For a source-built core, reinstall
 your wheel afterward and preserve it with `uv run --no-sync`.
 Reinstall frontend dependencies with `npm --prefix web-ui ci`, then stop and
-restart the managed services. Existing project documents remain project-v3.
+restart the managed services. Project documents still use format 3. If an
+existing rolling project explicitly sets `graph.nodes[].operator.spec.numerical_profile`,
+remove the field before importing or reopening the document. The core now uses
+compensated sliding arithmetic for rolling floating-point aggregates.
+
+Managed stream jobs now write v4 checkpoint manifests. To start a fresh lineage
+for a job with existing v3 checkpoints, stop Studio and move that project's
+checkpoint directory out of `.calc-flow-checkpoints` before restarting the job.
+Keep the previous checkpoints and sink output together for rollback. Use a fresh
+sink destination if replaying the source would duplicate existing output.
 
 Start the API and Vite server together from the repository root on macOS,
 Linux, or WSL:
@@ -115,9 +123,10 @@ uv run --no-sync --project . pytest --cov=calc_flow_studio
 
 The backend test suite enforces an 85% coverage floor. The running server's
 project schema and OpenAPI project components follow the installed core.
-`npm run sync:api` and `npm run build:wheel` generate the checked-in OpenAPI and
-TypeScript snapshots in an isolated Python 3.13 environment using the
-`2026.10.27` core wheel and [pinned API dependencies](web-ui/api-schema-constraints.txt).
+`npm run sync:api` and `npm run build:wheel` generate the checked-in project
+schema, OpenAPI, and TypeScript snapshots in an isolated Python 3.13 environment
+using the [pinned API dependencies](web-ui/api-schema-constraints.txt),
+including the `2026.11.29` core wheel.
 Use `npm ci` to install the generator from the npm lockfile. CI checks the
 snapshots against this toolchain.
 

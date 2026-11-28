@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 
+import pytest
 from studio_client import TestClient
 
 from calc_flow_studio.app import create_app
@@ -33,10 +34,16 @@ def _project() -> dict:
     }
 
 
-def test_batch_preview_runs_saved_data_in_a_worker(tmp_path):
+@pytest.mark.parametrize("mode", ["fixed", "auto_rows", "auto_plan"])
+def test_batch_preview_runs_saved_data_in_a_worker(tmp_path, mode):
     app = create_app(project_directory=tmp_path / "projects")
+    document = _project()
+    document["graph"]["datafusion"] = {
+        "parallelism_mode": mode,
+        "collect_diagnostics": True,
+    }
     with TestClient(app) as client:
-        assert client.post("/api/v3/projects", json=_project()).status_code == 201
+        assert client.post("/api/v3/projects", json=document).status_code == 201
         submitted = client.post(
             "/api/v3/previews", json={"project_id": "batch_preview"}
         )
@@ -56,6 +63,8 @@ def test_batch_preview_runs_saved_data_in_a_worker(tmp_path):
             {"a": 1, "b": 2, "total": 3},
             {"a": 3, "b": 4, "total": 7},
         ]
+        [metrics] = preview["result"]["datafusion_metrics"]
+        assert metrics["parallelism_mode"] == mode
         assert (
             client.delete(f"/api/v3/previews/{preview_id}").json()["status"]
             == "completed"

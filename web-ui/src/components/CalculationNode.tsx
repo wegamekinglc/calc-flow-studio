@@ -19,9 +19,13 @@ const nodeKindLabel = (kind: FlowNodeData['kind']): string => {
     case 'rolling': return 'ROLL';
     case 'cross_section': return 'CS';
     case 'stream_join': return 'JOIN';
+    case 'stream_asof_join': return 'ASOF';
     case 'window': return 'WIN';
     case 'union': return 'UNION';
-    default: return 'EXT';
+    case 'bounded_over': return 'OVER';
+    case 'bounded_order': return 'ORDER';
+    case 'distinct': return 'DISTINCT';
+    case 'external': return 'EXT';
   }
 };
 

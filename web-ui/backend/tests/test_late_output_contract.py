@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import json
 import logging
-from importlib.metadata import version
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -359,9 +358,8 @@ def test_late_openapi_embedded_schema_matches_native_and_checked_schema(
         serialized.replace(f"#/components/schemas/{component}/$defs/", "#/$defs/")
     )
     assert normalized == canonical
-    if version("calc-flow-python") == "2026.10.27":
-        checked = json.loads((root / "schemas/project-v3.schema.json").read_text())
-        assert canonical == checked
+    checked = json.loads((root / "schemas/project-v3.schema.json").read_text())
+    assert canonical == checked
     diagnostics = _diagnostic_fields()
     assert [field["data_type"] for field in diagnostics[2:5]] == ["int64"] * 3
     assert [field["data_type"] for field in diagnostics[-2:]] == ["uint64"] * 2
@@ -545,7 +543,8 @@ def test_invalid_late_project_never_submits_worker(tmp_path, case, code, path):
     manager = Mock()
     manager.submit_job.side_effect = AssertionError("worker submission reached")
     store = _StoredProject.__new__(_StoredProject)
-    store.project = ProjectDocument.model_construct(root=document)
+    store.project = Mock(spec=ProjectDocument, root=document)
+    store.project.canonical_json.return_value = json.dumps(document)
     with TestClient(create_app(project_store=store, run_manager=manager)) as client:
         response = client.post("/api/v3/jobs", json={"project_id": document["id"]})
     assert response.status_code == 422, response.text

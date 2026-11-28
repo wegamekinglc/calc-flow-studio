@@ -92,7 +92,7 @@ export function ResultsPanel({
         <section className="job-metrics" aria-label="Continuous job metrics">
           <article className="metric-card">
             <span className="eyebrow">Job state</span>
-            <strong>{progress?.state ?? job.status}</strong>
+            <strong>{active ? progress?.state ?? job.status : job.status}</strong>
             <small>{job.id}</small>
           </article>
           <article className="metric-card">
